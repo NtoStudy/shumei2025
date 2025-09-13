@@ -144,16 +144,36 @@ const mostCommonEmotion = computed(() => {
 // 图表初始化
 const initCharts = async () => {
   await nextTick()
-  initTrendChart()
-  initDistributionChart()
-  initHeatmapChart()
+  
+  // 使用setTimeout确保DOM已完全渲染
+  setTimeout(() => {
+    initTrendChart()
+    initDistributionChart()
+    initHeatmapChart()
+  }, 0)
 }
 
 const initTrendChart = () => {
   if (!trendChart.value) return
   
+  // 确保DOM元素已经渲染完成并且有宽高
+  if (trendChart.value.offsetHeight === 0 || trendChart.value.offsetWidth === 0) {
+    // 如果DOM元素尚未完全渲染，设置一个默认尺寸
+    trendChart.value.style.height = '400px'
+    trendChart.value.style.width = '100%'
+  }
+  
+  // 销毁之前的图表实例（如果存在）
+  const existingChart = echarts.getInstanceByDom(trendChart.value)
+  if (existingChart) {
+    existingChart.dispose()
+  }
+  
   const chart = echarts.init(trendChart.value)
   const data = getTrendData()
+  
+  // 检查是否有数据
+  const hasData = data && data.dates && data.dates.length > 0
   
   const option = {
     title: {
@@ -162,6 +182,11 @@ const initTrendChart = () => {
       textStyle: {
         color: '#FF6B6B',
         fontSize: 16
+      },
+      subtext: hasData ? '' : '暂无数据',
+      subtextStyle: {
+        color: '#999',
+        fontSize: 14
       }
     },
     tooltip: {
@@ -171,6 +196,13 @@ const initTrendChart = () => {
         return `${data.axisValue}<br/>强度: ${data.value}/10`
       }
     },
+    grid: {
+      left: '5%',
+      right: '5%',
+      bottom: '10%',
+      top: '15%',
+      containLabel: true
+    },
     xAxis: {
       type: 'category',
       data: data.dates,
@@ -178,6 +210,10 @@ const initTrendChart = () => {
         lineStyle: {
           color: '#E0E0E0'
         }
+      },
+      axisLabel: {
+        interval: 'auto',
+        rotate: data.dates && data.dates.length > 7 ? 30 : 0
       }
     },
     yAxis: {
@@ -191,7 +227,7 @@ const initTrendChart = () => {
       }
     },
     series: [{
-      data: data.intensities,
+      data: data.intensities || [],
       type: 'line',
       smooth: true,
       lineStyle: {
@@ -216,23 +252,52 @@ const initTrendChart = () => {
             color: 'rgba(255, 107, 107, 0.1)'
           }]
         }
-      }
+      },
+      markPoint: hasData ? {
+        data: [
+          { type: 'max', name: '最高强度' },
+          { type: 'min', name: '最低强度' }
+        ]
+      } : undefined
     }]
   }
   
   chart.setOption(option)
   
-  // 响应式调整
-  window.addEventListener('resize', () => {
+  // 立即执行一次resize确保图表正确渲染
+  setTimeout(() => {
     chart.resize()
-  })
+  }, 0)
+  
+  // 响应式调整
+  const resizeHandler = () => {
+    chart.resize()
+  }
+  window.removeEventListener('resize', resizeHandler)
+  window.addEventListener('resize', resizeHandler)
 }
 
 const initDistributionChart = () => {
   if (!distributionChart.value) return
   
+  // 确保DOM元素已经渲染完成并且有宽高
+  if (distributionChart.value.offsetHeight === 0 || distributionChart.value.offsetWidth === 0) {
+    // 如果DOM元素尚未完全渲染，设置一个默认尺寸
+    distributionChart.value.style.height = '400px'
+    distributionChart.value.style.width = '100%'
+  }
+  
+  // 销毁之前的图表实例（如果存在）
+  const existingChart = echarts.getInstanceByDom(distributionChart.value)
+  if (existingChart) {
+    existingChart.dispose()
+  }
+  
   const chart = echarts.init(distributionChart.value)
   const data = getDistributionData()
+  
+  // 检查是否有数据
+  const hasData = data && data.length > 0
   
   const option = {
     title: {
@@ -241,18 +306,33 @@ const initDistributionChart = () => {
       textStyle: {
         color: '#FF6B6B',
         fontSize: 16
+      },
+      subtext: hasData ? '' : '暂无数据',
+      subtextStyle: {
+        color: '#999',
+        fontSize: 14
       }
     },
     tooltip: {
       trigger: 'item',
       formatter: '{a} <br/>{b}: {c} ({d}%)'
     },
+    legend: {
+      orient: 'horizontal',
+      bottom: '5%',
+      left: 'center',
+      type: 'scroll',
+      pageIconColor: '#FF6B6B',
+      pageTextStyle: {
+        color: '#FF6B6B'
+      }
+    },
     series: [{
       name: '情绪分布',
       type: 'pie',
       radius: ['40%', '70%'],
-      center: ['50%', '50%'],
-      data: data,
+      center: ['50%', '45%'],
+      data: data || [],
       emphasis: {
         itemStyle: {
           shadowBlur: 10,
@@ -262,23 +342,58 @@ const initDistributionChart = () => {
       },
       label: {
         show: true,
-        formatter: '{b}: {c}'
+        formatter: '{b}: {c}',
+        position: 'outside'
+      },
+      labelLine: {
+        show: true,
+        length: 10,
+        length2: 10
+      },
+      itemStyle: {
+        borderRadius: 5,
+        borderColor: '#fff',
+        borderWidth: 2
       }
     }]
   }
   
   chart.setOption(option)
   
-  window.addEventListener('resize', () => {
+  // 立即执行一次resize确保图表正确渲染
+  setTimeout(() => {
     chart.resize()
-  })
+  }, 0)
+  
+  // 响应式调整
+  const resizeHandler = () => {
+    chart.resize()
+  }
+  window.removeEventListener('resize', resizeHandler)
+  window.addEventListener('resize', resizeHandler)
 }
 
 const initHeatmapChart = () => {
   if (!heatmapChart.value) return
   
+  // 确保DOM元素已经渲染完成并且有宽高
+  if (heatmapChart.value.offsetHeight === 0 || heatmapChart.value.offsetWidth === 0) {
+    // 如果DOM元素尚未完全渲染，设置一个默认尺寸
+    heatmapChart.value.style.height = '400px'
+    heatmapChart.value.style.width = '100%'
+  }
+  
+  // 销毁之前的图表实例（如果存在）
+  const existingChart = echarts.getInstanceByDom(heatmapChart.value)
+  if (existingChart) {
+    existingChart.dispose()
+  }
+  
   const chart = echarts.init(heatmapChart.value)
   const data = getHeatmapData()
+  
+  // 检查是否有数据
+  const hasData = data && data.values && data.values.length > 0
   
   const option = {
     title: {
@@ -287,23 +402,36 @@ const initHeatmapChart = () => {
       textStyle: {
         color: '#FF6B6B',
         fontSize: 16
+      },
+      subtext: hasData ? '' : '暂无数据',
+      subtextStyle: {
+        color: '#999',
+        fontSize: 14
       }
     },
     tooltip: {
       position: 'top',
       formatter: function(params) {
-        return `${params.data[1]}<br/>强度: ${params.data[2]}/10`
+        return `${params.name || data.days[params.data[1]]}<br/>时间: ${params.data[0]}:00<br/>强度: ${params.data[2]}/10`
       }
     },
     grid: {
       height: '50%',
-      top: '10%'
+      top: '15%',
+      left: '5%',
+      right: '5%',
+      bottom: '15%',
+      containLabel: true
     },
     xAxis: {
       type: 'category',
       data: data.hours,
       splitArea: {
         show: true
+      },
+      axisLabel: {
+        interval: 3,
+        formatter: '{value}'
       }
     },
     yAxis: {
@@ -319,7 +447,7 @@ const initHeatmapChart = () => {
       calculable: true,
       orient: 'horizontal',
       left: 'center',
-      bottom: '15%',
+      bottom: '5%',
       inRange: {
         color: ['#FFB6C1', '#FF6B6B', '#FF4500']
       }
@@ -329,7 +457,7 @@ const initHeatmapChart = () => {
       type: 'heatmap',
       data: data.values,
       label: {
-        show: true
+        show: false
       },
       emphasis: {
         itemStyle: {
@@ -342,25 +470,51 @@ const initHeatmapChart = () => {
   
   chart.setOption(option)
   
-  window.addEventListener('resize', () => {
+  // 立即执行一次resize确保图表正确渲染
+  setTimeout(() => {
     chart.resize()
-  })
+  }, 0)
+  
+  // 移除之前的事件监听器，避免重复添加
+  const resizeHandler = () => {
+    chart.resize()
+  }
+  window.removeEventListener('resize', resizeHandler)
+  window.addEventListener('resize', resizeHandler)
 }
 
 // 数据获取
 const getTrendData = () => {
-  const trendData = emotionStore.getEmotionTrend(selectedPeriod.value)
+  const trendData = emotionStore.getEmotionTrend(selectedPeriod.value) || []
+  
+  // 如果没有数据，返回空数组
+  if (!trendData || trendData.length === 0) {
+    return { dates: [], intensities: [] }
+  }
+  
   const dates = trendData.map(item => {
+    if (!item || !item.date) return ''
+    
     const date = new Date(item.date)
-    return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
+    // 根据不同时间段使用不同的日期格式
+    if (selectedPeriod.value === 'year') {
+      return date.toLocaleDateString('zh-CN', { month: 'short' })
+    } else if (selectedPeriod.value === 'month') {
+      return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
+    } else { // week
+      return date.toLocaleDateString('zh-CN', { weekday: 'short', day: 'numeric' })
+    }
+  }).filter(date => date !== '')
+  
+  const intensities = trendData.map(item => {
+    return item && typeof item.intensity === 'number' ? item.intensity : 0
   })
-  const intensities = trendData.map(item => item.intensity)
   
   return { dates, intensities }
 }
 
 const getDistributionData = () => {
-  const distribution = emotionStore.emotionDistribution
+  const distribution = emotionStore.emotionDistribution || {}
   const emotionLabels = {
     'happy': '开心',
     'sad': '难过',
@@ -372,27 +526,71 @@ const getDistributionData = () => {
     'confused': '困惑'
   }
   
-  return Object.entries(distribution).map(([type, count]) => ({
-    name: emotionLabels[type] || type,
-    value: count
-  }))
+  // 如果没有数据，返回空数组
+  if (!distribution || Object.keys(distribution).length === 0) {
+    return []
+  }
+  
+  // 情绪类型对应的颜色
+  const emotionColors = {
+    '开心': '#91CC75',
+    '平静': '#73C0DE',
+    '难过': '#5470C6',
+    '愤怒': '#EE6666',
+    '焦虑': '#FAC858',
+    '困惑': '#9A60B4',
+    '兴奋': '#FC8452',
+    '疲惫': '#3BA272'
+  }
+  
+  return Object.entries(distribution)
+    .filter(([_, count]) => count > 0) // 过滤掉数量为0的情绪
+    .map(([type, count]) => {
+      const name = emotionLabels[type] || type
+      return {
+        name: name,
+        value: count,
+        itemStyle: {
+          color: emotionColors[name] || '#FF6B6B' // 使用预定义颜色或默认颜色
+        }
+      }
+    })
 }
 
 const getHeatmapData = () => {
   // 生成最近7天的热力图数据
-  const emotions = emotionStore.emotions
+  const emotions = emotionStore.emotions || []
+  // 调整顺序为周一到周日
   const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-  const hours = Array.from({ length: 24 }, (_, i) => `${i}:00`)
+  const hours = Array.from({ length: 24 }, (_, i) => i)
   
   const values = []
   
-  // 简化版本，实际应该根据时间分组
-  emotions.forEach(emotion => {
+  // 如果没有数据，返回空结构
+  if (!emotions || emotions.length === 0) {
+    return { days, hours, values: [] }
+  }
+  
+  // 过滤最近7天的数据
+  const oneWeekAgo = new Date()
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+  
+  const recentEmotions = emotions.filter(emotion => {
     const date = new Date(emotion.timestamp)
-    const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1
+    return date >= oneWeekAgo
+  })
+  
+  // 根据时间分组处理数据
+  recentEmotions.forEach(emotion => {
+    if (!emotion || !emotion.intensity) return
+    
+    const date = new Date(emotion.timestamp)
+    // 调整dayIndex: 0是周一，6是周日
+    let dayIndex = date.getDay() - 1
+    if (dayIndex < 0) dayIndex = 6 // 周日
     const hour = date.getHours()
     
-    values.push([hour, dayIndex, emotion.emotion.intensity])
+    values.push([hour, dayIndex, emotion.intensity])
   })
   
   return { days, hours, values }

@@ -15,9 +15,9 @@
               <p class="welcome-desc">今天感觉怎么样？记录一下你的心情吧</p>
             </div>
             <div class="welcome-actions">
-              <el-button type="primary" @click="quickRecord" class="record-btn">
-                <el-icon><Edit /></el-icon>
-                快速记录
+              <el-button type="primary" @click="quickRecord" class="record-btn" size="large">
+                <el-icon class="record-icon"><Edit /></el-icon>
+                快速记录情绪
               </el-button>
             </div>
           </div>
@@ -227,7 +227,7 @@ const formatTime = (timestamp) => {
 }
 
 const quickRecord = () => {
-  router.push('/emotion/diary')
+  router.push('/emotion')
 }
 
 const goToBreathing = () => {
@@ -325,11 +325,27 @@ onMounted(() => {
 .record-btn {
   background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
   border: none;
-  padding: 12px 24px;
+  padding: 12px 30px;
   font-weight: 600;
+  font-size: 16px;
+  border-radius: 50px;
+  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.3);
+  transition: all 0.3s ease;
+  
+  .record-icon {
+    margin-right: 8px;
+    font-size: 18px;
+  }
   
   &:hover {
     background: linear-gradient(135deg, #FF5252 0%, #FF7979 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(1px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
   }
 }
 
