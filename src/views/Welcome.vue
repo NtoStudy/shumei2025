@@ -30,12 +30,16 @@
       <div class="features-section">
         <h2 class="section-title">核心功能</h2>
         <div class="features-grid">
-          <div class="feature-card" v-for="feature in features" :key="feature.id">
+          <div class="feature-card" v-for="feature in features" :key="feature.id" @click="showFeatureDetail(feature)">
             <div class="feature-icon">
               <el-icon :size="32"><component :is="feature.icon" /></el-icon>
             </div>
             <h3 class="feature-title">{{ feature.title }}</h3>
             <p class="feature-desc">{{ feature.description }}</p>
+            <div class="feature-hint">
+              <el-icon><InfoFilled /></el-icon>
+              点击查看详情
+            </div>
           </div>
         </div>
       </div>
@@ -45,28 +49,72 @@
         <h2 class="section-title">开始你的心灵之旅</h2>
         <p class="cta-desc">匿名、安全、温暖的心理健康陪伴</p>
         
+        <div class="privacy-confirmation">
+          <el-checkbox v-model="privacyAccepted" size="large">
+            我已阅读并同意
+            <el-button 
+              type="text" 
+              @click="showPrivacy"
+              class="privacy-link"
+            >
+              《隐私政策》
+            </el-button>
+          </el-checkbox>
+        </div>
+        
         <div class="cta-actions">
           <el-button 
             type="primary" 
             size="large" 
             @click="startJourney"
             class="start-btn"
+            :disabled="!privacyAccepted"
           >
             <el-icon><Right /></el-icon>
             开始使用
-          </el-button>
-          <el-button 
-            size="large" 
-            @click="showPrivacy"
-            class="privacy-btn"
-          >
-            <el-icon><Document /></el-icon>
-            隐私政策
           </el-button>
         </div>
       </div>
     </div>
     
+    <!-- 功能详情对话框 -->
+    <el-dialog
+      v-model="featureDetailVisible"
+      :title="selectedFeature?.title"
+      width="60%"
+      class="feature-dialog"
+    >
+      <div class="feature-detail-content" v-if="selectedFeature">
+        <div class="feature-detail-header">
+          <div class="feature-detail-icon">
+            <el-icon :size="48"><component :is="selectedFeature.icon" /></el-icon>
+          </div>
+          <div class="feature-detail-info">
+            <h3>{{ selectedFeature.title }}</h3>
+            <p class="feature-detail-desc">{{ selectedFeature.description }}</p>
+          </div>
+        </div>
+        
+        <div class="feature-detail-body">
+          <h4>功能特点</h4>
+          <ul class="feature-features">
+            <li v-for="feature in selectedFeature.features" :key="feature">{{ feature }}</li>
+          </ul>
+          
+          <h4>使用场景</h4>
+          <p class="feature-scenario">{{ selectedFeature.scenario }}</p>
+          
+          <h4>预期效果</h4>
+          <p class="feature-effect">{{ selectedFeature.effect }}</p>
+        </div>
+      </div>
+      
+      <template #footer>
+        <el-button @click="featureDetailVisible = false">关闭</el-button>
+        <el-button type="primary" @click="goToFeature">立即体验</el-button>
+      </template>
+    </el-dialog>
+
     <!-- 隐私政策对话框 -->
     <el-dialog
       v-model="privacyVisible"
@@ -90,7 +138,7 @@
       
       <template #footer>
         <el-button @click="privacyVisible = false">关闭</el-button>
-        <el-button type="primary" @click="acceptPrivacy">我同意并开始使用</el-button>
+        <el-button type="primary" @click="acceptPrivacy">我已阅读并同意</el-button>
       </template>
     </el-dialog>
   </div>
@@ -100,52 +148,145 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const userStore = useUserStore()
 
 const privacyVisible = ref(false)
+const featureDetailVisible = ref(false)
+const selectedFeature = ref(null)
+const privacyAccepted = ref(false)
 
 const features = ref([
   {
     id: 1,
     icon: 'Sunny',
     title: '情绪记录',
-    description: '记录每日情绪变化，了解自己的心理状态'
+    description: '记录每日情绪变化，了解自己的心理状态',
+    features: [
+      '多种情绪类型选择',
+      '情绪强度量化评分',
+      '情绪触发因素记录',
+      '情绪趋势可视化分析',
+      '数据导出和备份'
+    ],
+    scenario: '当你感到焦虑、压力或情绪波动时，可以随时记录当下的情绪状态，分析情绪变化规律。',
+    effect: '帮助你更好地了解自己的情绪模式，提升情绪管理能力，建立健康的心理状态。'
   },
   {
     id: 2,
     icon: 'Tools',
     title: '自助工具',
-    description: '呼吸练习、正念冥想等科学有效的调节方法'
+    description: '呼吸练习、正念冥想等科学有效的调节方法',
+    features: [
+      '引导式呼吸训练',
+      '正念冥想音频',
+      '认知重构练习',
+      '放松技巧指导',
+      '个性化推荐'
+    ],
+    scenario: '在考试前感到紧张、失眠时，或需要快速平复情绪时使用。',
+    effect: '通过科学的心理调节方法，帮助你快速缓解压力，恢复内心平静。'
   },
   {
     id: 3,
     icon: 'ChatDotRound',
     title: '社区互助',
-    description: '匿名分享心情，获得同龄人的理解和支持'
+    description: '匿名分享心情，获得同龄人的理解和支持',
+    features: [
+      '匿名树洞分享',
+      '互助小组讨论',
+      '温暖留言系统',
+      '经验分享平台',
+      '专业志愿者指导'
+    ],
+    scenario: '当你感到孤独、需要倾诉或寻求建议时，可以在社区中找到理解和支持。',
+    effect: '减少孤独感，获得情感支持，学习他人的应对经验，建立归属感。'
   },
   {
     id: 4,
     icon: 'TrendCharts',
     title: '成长记录',
-    description: '追踪心理健康变化，见证自己的成长历程'
+    description: '追踪心理健康变化，见证自己的成长历程',
+    features: [
+      '个人成长档案',
+      '成就徽章系统',
+      '成长报告生成',
+      '目标设定跟踪',
+      '里程碑庆祝'
+    ],
+    scenario: '定期回顾自己的心理健康状况，设定成长目标，记录进步过程。',
+    effect: '增强自我认知，提升成就感，激励持续的心理健康管理。'
   },
   {
     id: 5,
     icon: 'Reading',
     title: '专业资源',
-    description: '心理健康知识、专业测试、危机干预资源'
+    description: '心理健康知识、专业测试、危机干预资源',
+    features: [
+      '心理健康知识库',
+      '专业心理测试',
+      '危机干预指南',
+      '专业机构推荐',
+      '紧急联系方式'
+    ],
+    scenario: '需要了解心理健康知识、进行自我评估或遇到紧急情况时使用。',
+    effect: '提供科学可靠的心理健康信息，帮助识别问题，获得专业指导。'
   },
   {
     id: 6,
     icon: 'User',
     title: '个性化推荐',
-    description: '基于您的数据，提供个性化的内容和服务'
+    description: '基于您的数据，提供个性化的内容和服务',
+    features: [
+      '智能内容推荐',
+      '个性化学习路径',
+      '使用提醒设置',
+      '进度跟踪反馈',
+      '定制化服务'
+    ],
+    scenario: '根据你的使用习惯和情绪状态，系统会推荐最适合的工具和内容。',
+    effect: '提供更精准的服务，提高使用效果，增强用户体验。'
   }
 ])
 
+const showFeatureDetail = (feature) => {
+  selectedFeature.value = feature
+  featureDetailVisible.value = true
+}
+
+const goToFeature = () => {
+  featureDetailVisible.value = false
+  // 根据功能类型跳转到对应页面
+  switch (selectedFeature.value.id) {
+    case 1:
+      router.push('/emotion')
+      break
+    case 2:
+      router.push('/tools')
+      break
+    case 3:
+      router.push('/community')
+      break
+    case 4:
+      router.push('/growth')
+      break
+    case 5:
+      router.push('/resources')
+      break
+    case 6:
+      router.push('/home')
+      break
+  }
+}
+
 const startJourney = () => {
+  if (!privacyAccepted.value) {
+    ElMessage.warning('请先阅读并同意隐私政策')
+    return
+  }
+  
   console.log('开始使用按钮被点击')
   console.log('用户首次使用状态:', userStore.isFirstTime)
   console.log('用户信息:', userStore.profile)
@@ -165,7 +306,8 @@ const showPrivacy = () => {
 
 const acceptPrivacy = () => {
   privacyVisible.value = false
-  startJourney()
+  privacyAccepted.value = true
+  ElMessage.success('已确认阅读隐私政策')
 }
 
 const handleClose = (done) => {
@@ -316,6 +458,8 @@ const handleClose = (done) => {
   text-align: center;
   box-shadow: 0 8px 32px rgba(255, 107, 107, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  position: relative;
   
   &:hover {
     transform: translateY(-5px);
@@ -339,6 +483,23 @@ const handleClose = (done) => {
   color: #666;
   line-height: 1.6;
   font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.feature-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: #FF6B6B;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.8;
+  transition: opacity 0.3s;
+}
+
+.feature-card:hover .feature-hint {
+  opacity: 1;
 }
 
 .cta-section {
@@ -355,6 +516,22 @@ const handleClose = (done) => {
   margin-bottom: 30px;
 }
 
+.privacy-confirmation {
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: center;
+  
+  .privacy-link {
+    color: #FF6B6B;
+    padding: 0;
+    font-weight: 500;
+    
+    &:hover {
+      color: #FF5252;
+    }
+  }
+}
+
 .cta-actions {
   display: flex;
   gap: 20px;
@@ -369,8 +546,14 @@ const handleClose = (done) => {
   font-size: 16px;
   font-weight: 600;
   
-  &:hover {
+  &:hover:not(:disabled) {
     background: linear-gradient(135deg, #FF5252 0%, #FF7979 100%);
+  }
+  
+  &:disabled {
+    background: #E0E0E0;
+    color: #999;
+    cursor: not-allowed;
   }
 }
 
@@ -381,6 +564,83 @@ const handleClose = (done) => {
   &:hover {
     background: #FF6B6B;
     color: white;
+  }
+}
+
+// 功能详情对话框样式
+.feature-dialog {
+  .feature-detail-content {
+    .feature-detail-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #E0E0E0;
+      
+      .feature-detail-icon {
+        color: #FF6B6B;
+        flex-shrink: 0;
+      }
+      
+      .feature-detail-info {
+        h3 {
+          color: #333;
+          margin: 0 0 10px 0;
+          font-size: 24px;
+          font-weight: 600;
+        }
+        
+        .feature-detail-desc {
+          color: #666;
+          margin: 0;
+          font-size: 16px;
+          line-height: 1.6;
+        }
+      }
+    }
+    
+    .feature-detail-body {
+      h4 {
+        color: #FF6B6B;
+        margin: 20px 0 15px 0;
+        font-size: 18px;
+        font-weight: 600;
+      }
+      
+      .feature-features {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 20px 0;
+        
+        li {
+          position: relative;
+          padding-left: 20px;
+          margin-bottom: 8px;
+          color: #666;
+          line-height: 1.6;
+          
+          &::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #FF6B6B;
+            font-weight: bold;
+          }
+        }
+      }
+      
+      .feature-scenario,
+      .feature-effect {
+        color: #666;
+        line-height: 1.6;
+        margin: 0 0 15px 0;
+        padding: 15px;
+        background: #F8F9FA;
+        border-radius: 8px;
+        border-left: 4px solid #FF6B6B;
+      }
+    }
   }
 }
 

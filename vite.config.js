@@ -33,13 +33,7 @@ export default defineConfig({
       }
     })
   ],
-  css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@import "element-plus/theme-chalk/src/common/var.scss";`
-      }
-    }
-  },
+ 
   resolve: {
     alias: {
       '@': '/src'
