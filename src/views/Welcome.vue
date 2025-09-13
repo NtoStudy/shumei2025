@@ -26,9 +26,9 @@
         </div>
       </div>
       
-      <!-- 功能预览区域 -->
+      <!-- 产品特色区域 -->
       <div class="features-section">
-        <h2 class="section-title">核心功能</h2>
+        <h2 class="section-title">为什么选择向阳而生？</h2>
         <div class="features-grid">
           <div class="feature-card" v-for="feature in features" :key="feature.id" @click="showFeatureDetail(feature)">
             <div class="feature-icon">
@@ -44,35 +44,70 @@
         </div>
       </div>
       
+      <!-- 产品优势区域 -->
+      <div class="advantages-section">
+        <h2 class="section-title">我们的优势</h2>
+        <div class="advantages-grid">
+          <div class="advantage-card">
+            <div class="advantage-icon">
+              <el-icon><Shield /></el-icon>
+            </div>
+            <h3>完全匿名</h3>
+            <p>保护隐私，无需担心个人信息泄露</p>
+          </div>
+          <div class="advantage-card">
+            <div class="advantage-icon">
+              <el-icon><Heart /></el-icon>
+            </div>
+            <h3>温暖陪伴</h3>
+            <p>同龄人理解，温暖互助的社区氛围</p>
+          </div>
+          <div class="advantage-card">
+            <div class="advantage-icon">
+              <el-icon><Star /></el-icon>
+            </div>
+            <h3>科学专业</h3>
+            <p>基于心理学理论，提供科学有效的工具</p>
+          </div>
+        </div>
+      </div>
+      
       <!-- 开始使用区域 -->
       <div class="cta-section">
         <h2 class="section-title">开始你的心灵之旅</h2>
         <p class="cta-desc">匿名、安全、温暖的心理健康陪伴</p>
         
-        <div class="privacy-confirmation">
-          <el-checkbox v-model="privacyAccepted" size="large">
-            我已阅读并同意
-            <el-button 
-              type="text" 
-              @click="showPrivacy"
-              class="privacy-link"
-            >
-              《隐私政策》
-            </el-button>
-          </el-checkbox>
-        </div>
-        
         <div class="cta-actions">
           <el-button 
             type="primary" 
             size="large" 
-            @click="startJourney"
-            class="start-btn"
-            :disabled="!privacyAccepted"
+            @click="goToRegister"
+            class="primary-btn"
           >
-            <el-icon><Right /></el-icon>
-            开始使用
+            <el-icon><UserFilled /></el-icon>
+            立即注册
           </el-button>
+          <el-button 
+            size="large" 
+            @click="goToLogin"
+            class="secondary-btn"
+          >
+            <el-icon><User /></el-icon>
+            已有账户？登录
+          </el-button>
+        </div>
+        
+        <div class="privacy-info">
+          <p class="privacy-text">
+            注册即表示您同意我们的
+            <el-button type="text" @click="showPrivacy" class="privacy-link">
+              《隐私政策》
+            </el-button>
+            和
+            <el-button type="text" @click="showAgreement" class="privacy-link">
+              《用户协议》
+            </el-button>
+          </p>
         </div>
       </div>
     </div>
@@ -115,12 +150,38 @@
       </template>
     </el-dialog>
 
+    <!-- 用户协议对话框 -->
+    <el-dialog
+      v-model="agreementVisible"
+      title="用户协议"
+      width="70%"
+    >
+      <div class="agreement-content">
+        <h3>服务条款</h3>
+        <p>欢迎使用"向阳而生"大学生心理健康陪伴平台。通过注册和使用我们的服务，您同意遵守以下条款：</p>
+        
+        <h3>用户责任</h3>
+        <p>1. 您承诺提供真实、准确的信息</p>
+        <p>2. 您不得发布违法、有害、威胁、诽谤、侵犯他人隐私的内容</p>
+        <p>3. 您不得干扰或破坏平台正常运行</p>
+        
+        <h3>服务说明</h3>
+        <p>本平台提供心理健康相关的信息和服务，但不替代专业医疗建议。如有严重心理问题，请及时寻求专业帮助。</p>
+        
+        <h3>联系我们</h3>
+        <p>如有任何问题，请联系我们：support@xiangyang.com</p>
+      </div>
+      
+      <template #footer>
+        <el-button @click="agreementVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
+
     <!-- 隐私政策对话框 -->
     <el-dialog
       v-model="privacyVisible"
       title="隐私政策"
-      width="80%"
-      :before-close="handleClose"
+      width="70%"
     >
       <div class="privacy-content">
         <h3>数据保护承诺</h3>
@@ -138,7 +199,6 @@
       
       <template #footer>
         <el-button @click="privacyVisible = false">关闭</el-button>
-        <el-button type="primary" @click="acceptPrivacy">我已阅读并同意</el-button>
       </template>
     </el-dialog>
   </div>
@@ -154,9 +214,9 @@ const router = useRouter()
 const userStore = useUserStore()
 
 const privacyVisible = ref(false)
+const agreementVisible = ref(false)
 const featureDetailVisible = ref(false)
 const selectedFeature = ref(null)
-const privacyAccepted = ref(false)
 
 const features = ref([
   {
@@ -281,37 +341,20 @@ const goToFeature = () => {
   }
 }
 
-const startJourney = () => {
-  if (!privacyAccepted.value) {
-    ElMessage.warning('请先阅读并同意隐私政策')
-    return
-  }
-  
-  console.log('开始使用按钮被点击')
-  console.log('用户首次使用状态:', userStore.isFirstTime)
-  console.log('用户信息:', userStore.profile)
-  
-  if (userStore.isFirstTime) {
-    console.log('跳转到设置页面')
-    router.push('/settings')
-  } else {
-    console.log('跳转到首页')
-    router.push('/home')
-  }
-}
-
 const showPrivacy = () => {
   privacyVisible.value = true
 }
 
-const acceptPrivacy = () => {
-  privacyVisible.value = false
-  privacyAccepted.value = true
-  ElMessage.success('已确认阅读隐私政策')
+const showAgreement = () => {
+  agreementVisible.value = true
 }
 
-const handleClose = (done) => {
-  done()
+const goToLogin = () => {
+  router.push('/login')
+}
+
+const goToRegister = () => {
+  router.push('/register')
 }
 </script>
 
@@ -434,7 +477,11 @@ const handleClose = (done) => {
 }
 
 .features-section {
-  margin-bottom: 80px;
+  margin-bottom: 60px;
+}
+
+.advantages-section {
+  margin-bottom: 60px;
 }
 
 .section-title {
@@ -502,6 +549,52 @@ const handleClose = (done) => {
   opacity: 1;
 }
 
+.advantages-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-top: 40px;
+}
+
+.advantage-card {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(255, 107, 107, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: 2px solid transparent;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(255, 107, 107, 0.2);
+    border-color: #FF6B6B;
+  }
+  
+  .advantage-icon {
+    color: #FF6B6B;
+    margin-bottom: 20px;
+    
+    .el-icon {
+      font-size: 40px;
+    }
+  }
+  
+  h3 {
+    color: #333;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+  
+  p {
+    color: #666;
+    line-height: 1.6;
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
 .cta-section {
   text-align: center;
   background: white;
@@ -537,6 +630,60 @@ const handleClose = (done) => {
   gap: 20px;
   justify-content: center;
   flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+  border: none;
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  
+  &:hover {
+    background: linear-gradient(135deg, #FF5252 0%, #FF7979 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+  }
+}
+
+.secondary-btn {
+  color: #FF6B6B;
+  border-color: #FF6B6B;
+  background: transparent;
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  
+  &:hover {
+    background: #FF6B6B;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+  }
+}
+
+.privacy-info {
+  text-align: center;
+  margin-top: 20px;
+  
+  .privacy-text {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+    
+    .privacy-link {
+      color: #FF6B6B;
+      padding: 0;
+      font-weight: 500;
+      
+      &:hover {
+        color: #FF5252;
+      }
+    }
+  }
 }
 
 .start-btn {
