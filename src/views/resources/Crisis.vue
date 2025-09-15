@@ -38,7 +38,7 @@
           
           <div class="contact-card">
             <div class="contact-icon">
-              <el-icon><FirstAid /></el-icon>
+              <el-icon><Monitor /></el-icon>
             </div>
             <div class="contact-info">
               <h3>紧急救援</h3>
@@ -78,7 +78,7 @@
               
               <div class="sign-item">
                 <div class="sign-icon">
-                  <el-icon><Opportunity /></el-icon>
+                  <el-icon><User /></el-icon>
                 </div>
                 <div class="sign-content">
                   <h4>行为信号</h4>
@@ -113,7 +113,7 @@
             <div class="warning-signs">
               <div class="sign-item">
                 <div class="sign-icon">
-                  <el-icon><MoonNight /></el-icon>
+                  <el-icon><Moon /></el-icon>
                 </div>
                 <div class="sign-content">
                   <h4>情绪变化</h4>
@@ -128,7 +128,7 @@
               
               <div class="sign-item">
                 <div class="sign-icon">
-                  <el-icon><Sunrise /></el-icon>
+                  <el-icon><Sunny /></el-icon>
                 </div>
                 <div class="sign-content">
                   <h4>生理变化</h4>
@@ -143,7 +143,7 @@
               
               <div class="sign-item">
                 <div class="sign-icon">
-                  <el-icon><Cpu /></el-icon>
+                  <el-icon><Monitor /></el-icon>
                 </div>
                 <div class="sign-content">
                   <h4>认知变化</h4>
@@ -178,7 +178,7 @@
               
               <div class="sign-item">
                 <div class="sign-icon">
-                  <el-icon><Alarm /></el-icon>
+                  <el-icon><Bell /></el-icon>
                 </div>
                 <div class="sign-content">
                   <h4>恐慌发作</h4>
@@ -213,7 +213,7 @@
       <!-- 危机干预指南 -->
       <div class="crisis-intervention-section">
         <div class="section-header">
-          <el-icon class="header-icon"><Guide /></el-icon>
+          <el-icon class="header-icon"><QuestionFilled /></el-icon>
           <h2>危机干预指南</h2>
         </div>
         
@@ -381,7 +381,7 @@
       <!-- 安全计划工具 -->
       <div class="safety-plan-section">
         <div class="section-header">
-          <el-icon class="header-icon"><DocumentChecked /></el-icon>
+          <el-icon class="header-icon"><Document /></el-icon>
           <h2>个人安全计划</h2>
         </div>
         
@@ -495,25 +495,19 @@ import { ref, computed, onMounted } from 'vue'
 import {
   Warning,
   Phone,
-  FirstAid,
   Search,
   ChatDotRound,
-  Opportunity,
+  User,
   Cloudy,
-  MoonNight,
-  Sunrise,
-  Cpu,
+  Moon,
+  Sunny,
+  Monitor,
   Lightning,
-  Alarm,
+  Bell,
   CircleClose,
-  Guide,
+  QuestionFilled,
   Link,
-  DocumentChecked,
-  Promotion,
-  Reading,
-  OfficeBuilding,
-  Headset,
-  Notebook
+  Document
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 

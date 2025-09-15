@@ -121,6 +121,7 @@ onMounted(() => {
   
   .tab-content {
     margin-top: 20px;
+    min-height: 400px; // 确保有足够的高度显示内容
   }
 }
 
