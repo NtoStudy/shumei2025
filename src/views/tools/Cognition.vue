@@ -1,6 +1,5 @@
 <template>
   <div class="cognition-page">
-    <AppHeader />
     
     <div class="main-content">
       <div class="content-container">
@@ -206,7 +205,6 @@
       </div>
     </div>
     
-    <AppFooter />
     
     <!-- 保存成功提示 -->
     <el-dialog
@@ -235,8 +233,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import AppHeader from '@/components/common/AppHeader.vue'
-import AppFooter from '@/components/common/AppFooter.vue'
+
 import { Edit, SuccessFilled } from '@element-plus/icons-vue'
 
 const router = useRouter()

@@ -1,7 +1,6 @@
 <template>
   <div class="stress-management-page">
-    <AppHeader />
-    
+
     <div class="main-content">
       <div class="content-container">
         <div class="page-header">
@@ -345,14 +344,11 @@
       </div>
     </div>
     
-    <AppFooter />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import AppHeader from '@/components/common/AppHeader.vue'
-import AppFooter from '@/components/common/AppFooter.vue'
 
 // 压力管理工具数据
 const managementTools = ref([

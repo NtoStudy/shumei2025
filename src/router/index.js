@@ -73,39 +73,7 @@ const routes = [
       {
         path: '/tools',
         name: 'Tools',
-        component: () => import('@/views/tools/ToolsIndex.vue'),
-        children: [
-          {
-            path: 'breathing',
-            name: 'Breathing',
-            component: () => import('@/views/tools/Breathing.vue')
-          },
-          {
-            path: 'meditation',
-            name: 'Meditation',
-            component: () => import('@/views/tools/Meditation.vue')
-          },
-          {
-            path: 'cognition',
-            name: 'Cognition',
-            component: () => import('@/views/tools/Cognition.vue')
-          },
-          {
-            path: 'relaxation',
-            name: 'Relaxation',
-            component: () => import('@/views/tools/Relaxation.vue')
-          },
-          {
-            path: 'stress-management',
-            name: 'StressManagement',
-            component: () => import('@/views/tools/StressManagement.vue')
-          },
-          {
-            path: 'emotion-regulation',
-            name: 'EmotionRegulation',
-            component: () => import('@/views/tools/EmotionRegulation.vue')
-          }
-        ]
+        component: () => import('@/views/tools/ToolsIndex.vue')
       },
       {
         path: '/community',
@@ -167,6 +135,36 @@ const routes = [
         path: '/settings',
         name: 'Settings',
         component: () => import('@/views/Settings.vue')
+      },
+      {
+        path: '/tools/breathing',
+        name: 'Breathing',
+        component: () => import('@/views/tools/Breathing.vue')
+      },
+      {
+        path: '/tools/meditation',
+        name: 'Meditation',
+        component: () => import('@/views/tools/Meditation.vue')
+      },
+      {
+        path: '/tools/cognition',
+        name: 'Cognition',
+        component: () => import('@/views/tools/Cognition.vue')
+      },
+      {
+        path: '/tools/relaxation',
+        name: 'Relaxation',
+        component: () => import('@/views/tools/Relaxation.vue')
+      },
+      {
+        path: '/tools/stress-management',
+        name: 'StressManagement',
+        component: () => import('@/views/tools/StressManagement.vue')
+      },
+      {
+        path: '/tools/emotion-regulation',
+        name: 'EmotionRegulation',
+        component: () => import('@/views/tools/EmotionRegulation.vue')
       }
     ]
   },

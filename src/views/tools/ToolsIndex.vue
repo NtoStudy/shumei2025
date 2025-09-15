@@ -7,7 +7,7 @@
       </h1>
       <p class="page-desc">科学有效的心理调节方法，帮助你更好地管理情绪</p>
     </div>
-        
+
         <div class="tools-grid">
           <div class="tool-card" @click="goToBreathing">
             <div class="tool-icon">
@@ -20,7 +20,7 @@
               <span class="tool-level">初级</span>
             </div>
           </div>
-          
+
           <div class="tool-card" @click="goToMeditation">
             <div class="tool-icon">
               <el-icon><Headset /></el-icon>
@@ -32,7 +32,7 @@
               <span class="tool-level">中级</span>
             </div>
           </div>
-          
+
           <div class="tool-card" @click="goToCognition">
             <div class="tool-icon">
               <el-icon><Edit /></el-icon>
@@ -44,7 +44,7 @@
               <span class="tool-level">高级</span>
             </div>
           </div>
-          
+
           <div class="tool-card" @click="goToRelaxation">
             <div class="tool-icon">
               <el-icon><Timer /></el-icon>
@@ -56,7 +56,7 @@
               <span class="tool-level">初级</span>
             </div>
           </div>
-          
+
           <div class="tool-card" @click="goToStressManagement">
             <div class="tool-icon">
               <el-icon><TrendCharts /></el-icon>
@@ -68,7 +68,7 @@
               <span class="tool-level">中级</span>
             </div>
           </div>
-          
+
           <div class="tool-card" @click="goToEmotionRegulation">
             <div class="tool-icon">
               <el-icon><Star /></el-icon>
@@ -81,7 +81,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- 使用统计 -->
         <div class="usage-stats">
           <h3 class="section-title">使用统计</h3>
@@ -117,7 +117,7 @@
               </div>
             </div>
           </div>
-    </div>
+  </div>
   </div>
 </template>
 
@@ -159,7 +159,7 @@ const goToEmotionRegulation = () => {
 .page-header {
   text-align: center;
   margin-bottom: 40px;
-  
+
   .page-title {
     display: flex;
     align-items: center;
@@ -170,7 +170,7 @@ const goToEmotionRegulation = () => {
     font-weight: 600;
     margin-bottom: 10px;
   }
-  
+
   .page-desc {
     color: #666;
     font-size: 16px;
@@ -193,12 +193,12 @@ const goToEmotionRegulation = () => {
   cursor: pointer;
   transition: all 0.3s;
   position: relative;
-  
+
   &:hover:not(.coming-soon) {
     transform: translateY(-5px);
     box-shadow: 0 12px 40px rgba(255, 107, 107, 0.2);
   }
-  
+
   &.coming-soon {
     opacity: 0.6;
     cursor: not-allowed;
@@ -208,7 +208,7 @@ const goToEmotionRegulation = () => {
 .tool-icon {
   color: #FF6B6B;
   margin-bottom: 20px;
-  
+
   .el-icon {
     font-size: 40px;
   }
@@ -230,7 +230,7 @@ const goToEmotionRegulation = () => {
 .tool-meta {
   display: flex;
   gap: 15px;
-  
+
   .tool-duration,
   .tool-level {
     background: #FFB6C1;
@@ -240,7 +240,7 @@ const goToEmotionRegulation = () => {
     font-size: 12px;
     font-weight: 500;
   }
-  
+
   .tool-level {
     background: #87CEEB;
   }
@@ -291,7 +291,7 @@ const goToEmotionRegulation = () => {
 
 .stat-icon {
   color: #FF6B6B;
-  
+
   .el-icon {
     font-size: 24px;
   }
@@ -303,14 +303,14 @@ const goToEmotionRegulation = () => {
     margin: 0 0 5px 0;
     font-size: 14px;
   }
-  
+
   .stat-number {
     color: #FF6B6B;
     font-size: 24px;
     font-weight: 600;
     margin: 0;
   }
-  
+
   .stat-desc {
     color: #999;
     font-size: 12px;

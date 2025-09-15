@@ -1,7 +1,7 @@
 <template>
   <div class="meditation-page">
-    <AppHeader />
-    
+
+
     <div class="main-content">
       <div class="content-container">
         <div class="page-header">
@@ -220,7 +220,6 @@
       </div>
     </div>
     
-    <AppFooter />
     
     <!-- 音频元素 -->
     <audio ref="guidanceAudio" preload="auto"></audio>
@@ -230,8 +229,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import AppHeader from '@/components/common/AppHeader.vue'
-import AppFooter from '@/components/common/AppFooter.vue'
 
 // 冥想主题数据
 const meditationThemes = ref([

@@ -1,5 +1,8 @@
 <template>
   <div class="breathing-page">
+
+    <div class="main-content">
+      <div class="content-container">
         <div class="page-header">
           <h1 class="page-title">
             <el-icon><WindPower /></el-icon>
@@ -7,14 +10,14 @@
           </h1>
           <p class="page-desc">通过科学的呼吸方法缓解焦虑，放松身心</p>
         </div>
-        
+
         <div class="breathing-container">
-          <!-- 呼吸模式选择 -->
-          <div class="pattern-selector">
-            <h3 class="section-title">选择呼吸模式</h3>
-            <div class="pattern-grid">
-              <div 
-                v-for="pattern in breathingPatterns" 
+      <!-- 呼吸模式选择 -->
+      <div class="pattern-selector">
+        <h3 class="section-title">选择呼吸模式</h3>
+        <div class="pattern-grid">
+              <div
+                v-for="pattern in breathingPatterns"
                 :key="pattern.id"
                 class="pattern-card"
                 :class="{ active: selectedPattern === pattern.id }"
@@ -29,24 +32,24 @@
               </div>
             </div>
           </div>
-          
+
           <!-- 呼吸练习区域 -->
           <div class="breathing-exercise" v-if="selectedPattern">
             <div class="exercise-header">
               <h3 class="exercise-title">{{ currentPattern.name }}</h3>
               <p class="exercise-desc">{{ currentPattern.description }}</p>
             </div>
-            
+
             <div class="breathing-circle-container">
-              <div 
+              <div
                 class="breathing-circle"
-                :class="{ 
-                  'inhale': isInhaling, 
+                :class="{
+                  'inhale': isInhaling,
                   'exhale': isExhaling,
                   'hold': isHolding,
                   [`animation-${currentPattern.animation || 'circle'}`]: true
                 }"
-                :style="{ 
+                :style="{
                   transform: `scale(${circleScale})`,
                   opacity: circleOpacity,
                   '--primary-color': currentPattern.color || '#FF6B6B',
@@ -60,33 +63,33 @@
                 </div>
               </div>
             </div>
-            
+
             <div class="exercise-controls">
               <div class="timer-display">
                 <el-icon><Timer /></el-icon>
                 <span>{{ formatTime(remainingTime) }}</span>
               </div>
-              
+
               <div class="control-buttons">
-                <el-button 
-                  v-if="!isRunning" 
-                  type="primary" 
+                <el-button
+                  v-if="!isRunning"
+                  type="primary"
                   @click="startExercise"
                   class="start-btn"
                 >
                   <el-icon><VideoPlay /></el-icon>
                   开始练习
                 </el-button>
-                <el-button 
-                  v-if="isRunning" 
+                <el-button
+                  v-if="isRunning"
                   @click="pauseExercise"
                   class="pause-btn"
                 >
                   <el-icon><VideoPause /></el-icon>
                   暂停
                 </el-button>
-                <el-button 
-                  v-if="isRunning" 
+                <el-button
+                  v-if="isRunning"
                   @click="stopExercise"
                   class="stop-btn"
                 >
@@ -95,24 +98,24 @@
                 </el-button>
               </div>
             </div>
-            
+
             <div class="progress-section" v-if="isRunning">
               <div class="progress-bar">
-                <div 
-                  class="progress-fill" 
+                <div
+                  class="progress-fill"
                   :style="{ width: `${progress}%` }"
                 ></div>
               </div>
               <div class="progress-text">进度: {{ Math.round(progress) }}%</div>
             </div>
           </div>
-          
+
           <!-- 练习记录 -->
           <div class="practice-records">
             <h3 class="section-title">练习记录</h3>
             <div class="records-list" v-if="practiceRecords.length > 0">
-              <div 
-                v-for="record in practiceRecords" 
+              <div
+                v-for="record in practiceRecords"
                 :key="record.id"
                 class="record-item"
               >
@@ -133,11 +136,16 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import AppHeader from '@/components/common/AppHeader.vue'
+import AppFooter from '@/components/common/AppFooter.vue'
 
 // 呼吸模式数据
 const breathingPatterns = ref([
@@ -282,12 +290,12 @@ const selectPattern = (patternId) => {
 
 const startExercise = () => {
   if (!selectedPattern.value) return
-  
+
   isRunning.value = true
   remainingTime.value = currentPattern.value.duration * 60
   progress.value = 0
   breathingCount.value = 0
-  
+
   startBreathingCycle()
   startExerciseTimer()
 }
@@ -312,12 +320,12 @@ const startBreathingCycle = () => {
   const pattern = currentPattern.value
   let phase = 'inhale'
   let phaseTime = 0
-  
+
   const cycle = () => {
     if (!isRunning.value) return
-    
+
     phaseTime++
-    
+
     switch (phase) {
       case 'inhale':
         isInhaling.value = true
@@ -357,20 +365,20 @@ const startBreathingCycle = () => {
         }
         break
     }
-    
+
     breathingTimer = setTimeout(cycle, 1000)
   }
-  
+
   cycle()
 }
 
 const startExerciseTimer = () => {
   exerciseTimer = setInterval(() => {
     if (!isRunning.value) return
-    
+
     remainingTime.value--
     progress.value = ((currentPattern.value.duration * 60 - remainingTime.value) / (currentPattern.value.duration * 60)) * 100
-    
+
     if (remainingTime.value <= 0) {
       completeExercise()
     }
@@ -379,7 +387,7 @@ const startExerciseTimer = () => {
 
 const completeExercise = () => {
   stopExercise()
-  
+
   // 添加练习记录
   practiceRecords.value.unshift({
     id: Date.now(),
@@ -387,7 +395,7 @@ const completeExercise = () => {
     date: new Date(),
     duration: currentPattern.value.duration
   })
-  
+
   // 显示完成消息
   ElMessage.success('练习完成！做得很好！')
 }
@@ -429,13 +437,27 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 .breathing-page {
-  // Layout styles moved to DefaultLayout component
+  min-height: 100vh;
+  background: linear-gradient(135deg, #FFF8DC 0%, #F0F8FF 100%);
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px 0;
+}
+
+.content-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .page-header {
   text-align: center;
   margin-bottom: 40px;
-  
+
   .page-title {
     display: flex;
     align-items: center;
@@ -446,7 +468,7 @@ onUnmounted(() => {
     font-weight: 600;
     margin-bottom: 10px;
   }
-  
+
   .page-desc {
     color: #666;
     font-size: 16px;
@@ -489,12 +511,12 @@ onUnmounted(() => {
   text-align: center;
   cursor: pointer;
   transition: all 0.3s;
-  
+
   &:hover {
     border-color: #FFB6C1;
     transform: translateY(-2px);
   }
-  
+
   &.active {
     border-color: #FF6B6B;
     background: #FFF0F0;
@@ -504,7 +526,7 @@ onUnmounted(() => {
 .pattern-icon {
   color: #FF6B6B;
   margin-bottom: 15px;
-  
+
   .el-icon {
     font-size: 32px;
   }
@@ -544,14 +566,14 @@ onUnmounted(() => {
 
 .exercise-header {
   margin-bottom: 40px;
-  
+
   .exercise-title {
     color: #FF6B6B;
     font-size: 24px;
     font-weight: 600;
     margin-bottom: 10px;
   }
-  
+
   .exercise-desc {
     color: #666;
     font-size: 16px;
@@ -579,38 +601,38 @@ onUnmounted(() => {
   background: linear-gradient(135deg, var(--primary-color, #FFB6C1) 0%, var(--secondary-color, #FFC0CB) 100%);
   position: relative;
   overflow: hidden;
-  
+
   &.inhale {
     border-color: #87CEEB;
     background: linear-gradient(135deg, #87CEEB 0%, #B0E0E6 100%);
   }
-  
+
   &.exhale {
     border-color: #98FB98;
     background: linear-gradient(135deg, #98FB98 0%, #90EE90 100%);
   }
-  
+
   &.hold {
     border-color: #DDA0DD;
     background: linear-gradient(135deg, #DDA0DD 0%, #EE82EE 100%);
   }
-  
+
   &.animation-square {
     border-radius: 15px;
-    
+
     &.inhale {
       transform: scale(1.2) rotate(0deg) !important;
     }
-    
+
     &.hold {
       transform: scale(1.2) rotate(90deg) !important;
     }
-    
+
     &.exhale {
       transform: scale(0.8) rotate(180deg) !important;
     }
   }
-  
+
   &.animation-wave {
     &::before {
       content: '';
@@ -623,20 +645,20 @@ onUnmounted(() => {
       border-radius: 50% 50% 0 0;
       transition: height 1s ease;
     }
-    
+
     &.inhale::before {
       height: 80%;
     }
-    
+
     &.exhale::before {
       height: 20%;
     }
   }
-  
+
   &.animation-alternate {
     position: relative;
     overflow: hidden;
-    
+
     &::before, &::after {
       content: '';
       position: absolute;
@@ -646,21 +668,21 @@ onUnmounted(() => {
       background: rgba(255, 255, 255, 0.2);
       transition: opacity 1s ease;
     }
-    
+
     &::before {
       left: 0;
       opacity: 0;
     }
-    
+
     &::after {
       right: 0;
       opacity: 0;
     }
-    
+
     &.inhale::before {
       opacity: 1;
     }
-    
+
     &.exhale::after {
       opacity: 1;
     }
@@ -669,20 +691,20 @@ onUnmounted(() => {
 
 .circle-content {
   text-align: center;
-  
+
   .breathing-text {
     font-size: 20px;
     font-weight: 600;
     color: #333;
     margin-bottom: 10px;
   }
-  
+
   .breathing-count {
     font-size: 16px;
     color: #666;
     margin-bottom: 8px;
   }
-  
+
   .breathing-guidance {
     color: #333;
     font-size: 14px;
@@ -722,7 +744,7 @@ onUnmounted(() => {
   border: none;
   padding: 12px 24px;
   font-weight: 600;
-  
+
   &:hover {
     background: linear-gradient(135deg, #FF5252 0%, #FF7979 100%);
   }
@@ -731,7 +753,7 @@ onUnmounted(() => {
 .pause-btn {
   color: #FF6B6B;
   border-color: #FF6B6B;
-  
+
   &:hover {
     background: #FF6B6B;
     color: white;
@@ -741,7 +763,7 @@ onUnmounted(() => {
 .stop-btn {
   color: #666;
   border-color: #E0E0E0;
-  
+
   &:hover {
     color: #FF6B6B;
     border-color: #FF6B6B;
@@ -757,13 +779,13 @@ onUnmounted(() => {
     overflow: hidden;
     margin-bottom: 10px;
   }
-  
+
   .progress-fill {
     height: 100%;
     background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
     transition: width 0.3s ease;
   }
-  
+
   .progress-text {
     text-align: center;
     color: #666;
@@ -800,7 +822,7 @@ onUnmounted(() => {
     margin: 0 0 5px 0;
     font-size: 16px;
   }
-  
+
   p {
     color: #666;
     margin: 0;
@@ -820,13 +842,13 @@ onUnmounted(() => {
   text-align: center;
   padding: 40px;
   color: #666;
-  
+
   .no-records-icon {
     font-size: 48px;
     color: #FFB6C1;
     margin-bottom: 15px;
   }
-  
+
   p {
     margin: 5px 0;
   }
@@ -836,21 +858,21 @@ onUnmounted(() => {
   .page-title {
     font-size: 24px;
   }
-  
+
   .pattern-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .breathing-circle {
     width: 150px;
     height: 150px;
   }
-  
+
   .exercise-controls {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .control-buttons {
     flex-wrap: wrap;
     justify-content: center;
