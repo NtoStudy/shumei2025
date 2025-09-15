@@ -77,23 +77,6 @@
             <el-button @click="addCustomTrigger">添加</el-button>
           </template>
         </el-input>
-        
-        <!-- 已选择的触发因素 -->
-        <div class="selected-triggers" v-if="selectedTriggers.length > 0">
-          <h4 class="subsection-title">已选择的触发因素：</h4>
-          <div class="selected-trigger-tags">
-            <el-tag
-              v-for="trigger in selectedTriggers"
-              :key="trigger"
-              closable
-              type="primary"
-              @close="toggleTrigger(trigger)"
-              class="selected-trigger-tag"
-            >
-              {{ trigger }}
-            </el-tag>
-          </div>
-        </div>
       </div>
       
       <!-- 标签 -->
@@ -471,40 +454,10 @@ onMounted(() => {
   &:hover {
     transform: scale(1.05);
   }
-  
-  &.el-tag--primary {
-    background-color: #FF6B6B;
-    border-color: #FF6B6B;
-    color: white;
-    transform: scale(1.05);
-  }
 }
 
 .custom-trigger-input {
   margin-top: 15px;
-}
-
-.selected-triggers {
-  margin-top: 20px;
-}
-
-.subsection-title {
-  color: #666;
-  font-size: 16px;
-  margin-bottom: 10px;
-  font-weight: 500;
-}
-
-.selected-trigger-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.selected-trigger-tag {
-  background-color: rgba(255, 107, 107, 0.1);
-  border-color: #FF6B6B;
-  color: #FF6B6B;
 }
 
 .tags-section {

@@ -1,38 +1,28 @@
 <template>
   <div class="growth-page">
-    <AppHeader />
-    
-    <div class="main-content">
-      <div class="content-container">
-        <div class="page-header">
-          <h1 class="page-title">
-            <el-icon><TrendCharts /></el-icon>
-            成长记录
-          </h1>
-          <p class="page-desc">追踪你的心理健康变化，见证成长历程</p>
-        </div>
-        
-        <div class="growth-tabs">
-          <el-tabs v-model="activeTab" @tab-click="handleTabClick">
-            <el-tab-pane label="个人档案" name="profile">
-              <Profile />
-            </el-tab-pane>
-            <el-tab-pane label="成长报告" name="report">
-              <Report />
-            </el-tab-pane>
-          </el-tabs>
-        </div>
-      </div>
+    <div class="page-header">
+      <h1 class="page-title">
+        <el-icon><TrendCharts /></el-icon>
+        成长记录
+      </h1>
+      <p class="page-desc">追踪你的心理健康变化，见证成长历程</p>
     </div>
     
-    <AppFooter />
+    <div class="growth-tabs">
+      <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+        <el-tab-pane label="个人档案" name="profile">
+          <Profile />
+        </el-tab-pane>
+        <el-tab-pane label="成长报告" name="report">
+          <Report />
+        </el-tab-pane>
+      </el-tabs>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import AppHeader from '@/components/common/AppHeader.vue'
-import AppFooter from '@/components/common/AppFooter.vue'
 import Profile from './Profile.vue'
 import Report from './Report.vue'
 
@@ -45,21 +35,7 @@ const handleTabClick = (tab) => {
 
 <style scoped lang="scss">
 .growth-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #FFF8DC 0%, #F0F8FF 100%);
-  display: flex;
-  flex-direction: column;
-}
-
-.main-content {
-  flex: 1;
-  padding: 20px 0;
-}
-
-.content-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+  // Layout styles moved to DefaultLayout component
 }
 
 .page-header {

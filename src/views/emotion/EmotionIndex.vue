@@ -1,39 +1,29 @@
 <template>
   <div class="emotion-page">
-    <AppHeader />
-    
-    <div class="main-content">
-      <div class="content-container">
-        <div class="page-header">
-          <h1 class="page-title">
-            <el-icon><Sunny /></el-icon>
-            情绪记录
-          </h1>
-          <p class="page-desc">记录你的情绪变化，了解自己的心理状态</p>
-        </div>
-        
-        <div class="emotion-tabs">
-          <el-tabs v-model="activeTab" @tab-click="handleTabClick">
-            <el-tab-pane label="情绪日记" name="diary">
-              <EmotionDiary />
-            </el-tab-pane>
-            <el-tab-pane label="情绪图谱" name="chart">
-              <EmotionChart />
-            </el-tab-pane>
-          </el-tabs>
-        </div>
-      </div>
+    <div class="page-header">
+      <h1 class="page-title">
+        <el-icon><Sunny /></el-icon>
+        情绪记录
+      </h1>
+      <p class="page-desc">记录你的情绪变化，了解自己的心理状态</p>
     </div>
     
-    <AppFooter />
+    <div class="emotion-tabs">
+      <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+        <el-tab-pane label="情绪日记" name="diary">
+          <EmotionDiary />
+        </el-tab-pane>
+        <el-tab-pane label="情绪图谱" name="chart">
+          <EmotionChart />
+        </el-tab-pane>
+      </el-tabs>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import AppHeader from '@/components/common/AppHeader.vue'
-import AppFooter from '@/components/common/AppFooter.vue'
 import EmotionDiary from './EmotionDiary.vue'
 import EmotionChart from './EmotionChart.vue'
 
@@ -47,21 +37,7 @@ const handleTabClick = (tab) => {
 
 <style scoped lang="scss">
 .emotion-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #FFF8DC 0%, #F0F8FF 100%);
-  display: flex;
-  flex-direction: column;
-}
-
-.main-content {
-  flex: 1;
-  padding: 20px 0;
-}
-
-.content-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+  // Layout styles moved to DefaultLayout component
 }
 
 .page-header {

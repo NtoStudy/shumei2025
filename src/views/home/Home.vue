@@ -1,9 +1,5 @@
 <template>
   <div class="home-page">
-    <AppHeader />
-    
-    <div class="main-content">
-      <div class="content-container">
         <!-- 欢迎区域 -->
         <div class="welcome-section">
           <div class="welcome-card">
@@ -67,7 +63,7 @@
             </div>
             <div class="action-card" @click="goToMeditation">
               <div class="action-icon">
-                <el-icon><Headphones /></el-icon>
+                <el-icon><Headset /></el-icon>
               </div>
               <h4>正念冥想</h4>
               <p>提升专注力，平静内心</p>
@@ -152,10 +148,6 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    
-    <AppFooter />
   </div>
 </template>
 
@@ -165,8 +157,6 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useEmotionStore } from '@/stores/emotion'
 import { useCommunityStore } from '@/stores/community'
-import AppHeader from '@/components/common/AppHeader.vue'
-import AppFooter from '@/components/common/AppFooter.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -269,21 +259,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .home-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #FFF8DC 0%, #F0F8FF 100%);
-  display: flex;
-  flex-direction: column;
-}
-
-.main-content {
-  flex: 1;
-  padding: 20px 0;
-}
-
-.content-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+  // Layout styles moved to DefaultLayout component
 }
 
 .welcome-section {

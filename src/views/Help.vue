@@ -1,9 +1,5 @@
 <template>
   <div class="help-page">
-    <AppHeader />
-    
-    <div class="main-content">
-      <div class="content-container">
         <div class="page-header">
           <h1 class="page-title">
             <el-icon><QuestionFilled /></el-icon>
@@ -204,17 +200,11 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    
-    <AppFooter />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import AppHeader from '@/components/common/AppHeader.vue'
-import AppFooter from '@/components/common/AppFooter.vue'
 
 const searchKeyword = ref('')
 const selectedCategory = ref('getting-started')
@@ -513,3 +503,4 @@ const selectCategory = (category) => {
   }
 }
 </style>
+

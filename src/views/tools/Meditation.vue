@@ -6,7 +6,7 @@
       <div class="content-container">
         <div class="page-header">
           <h1 class="page-title">
-            <el-icon><Headphones /></el-icon>
+            <el-icon><Headset /></el-icon>
             正念冥想
           </h1>
           <p class="page-desc">通过正念冥想提升专注力，平静内心，培养正念意识</p>
@@ -34,6 +34,65 @@
             </div>
           </div>
           
+          <!-- 音频设置 -->
+          <div class="audio-settings" v-if="selectedTheme">
+            <h3 class="section-title">音频设置</h3>
+            <div class="settings-container">
+              <div class="setting-group">
+                <div class="setting-label">
+                  <el-icon><Microphone /></el-icon>
+                  引导语音
+                </div>
+                <div class="setting-control">
+                  <el-switch 
+                    v-model="audioSettings.guidance" 
+                    :disabled="!currentTheme.hasGuidance"
+                  />
+                </div>
+              </div>
+              
+              <div class="setting-group">
+                <div class="setting-label">
+                  <el-icon><Headset /></el-icon>
+                  背景音乐
+                </div>
+                <div class="setting-control">
+                  <el-switch 
+                    v-model="audioSettings.music" 
+                    :disabled="!currentTheme.hasMusic"
+                  />
+                </div>
+              </div>
+              
+              <div class="setting-group" v-if="audioSettings.music && currentTheme.hasMusic">
+                <div class="setting-label">
+                  <el-icon><List /></el-icon>
+                  音乐选择
+                </div>
+                <div class="setting-control">
+                  <el-select v-model="audioSettings.selectedMusic" placeholder="选择背景音乐">
+                    <el-option 
+                      v-for="music in backgroundMusics" 
+                      :key="music.id" 
+                      :label="music.name" 
+                      :value="music.id"
+                    />
+                  </el-select>
+                </div>
+              </div>
+              
+              <div class="setting-group">
+                <div class="setting-label">
+                  <el-icon><TurnOff /></el-icon>
+                  音量
+                </div>
+                <div class="setting-control volume-slider">
+                  <el-slider v-model="audioSettings.volume" :min="0" :max="100" :step="1" />
+                </div>
+              </div>
+            </div>
+          </div>
+          
           <!-- 冥想练习区域 -->
           <div class="meditation-exercise" v-if="selectedTheme">
             <div class="exercise-header">
@@ -43,14 +102,20 @@
             
             <div class="meditation-player">
               <div class="player-container">
-                <div class="meditation-circle">
+                <div class="meditation-circle" :style="{ background: isPlaying ? `linear-gradient(135deg, ${currentTheme.color || '#FFB6C1'} 0%, #FFC0CB 100%)` : 'linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 100%)' }">
                   <div class="circle-content">
                     <div class="meditation-icon">
-                      <el-icon><Headphones /></el-icon>
+                      <el-icon><Headset /></el-icon>
                     </div>
                     <div class="meditation-status">{{ meditationStatus }}</div>
                     <div class="meditation-time">{{ formatTime(remainingTime) }}</div>
                   </div>
+                </div>
+                
+                <div class="meditation-ripples" v-if="isPlaying">
+                  <div class="ripple" :style="{ borderColor: currentTheme.color || '#FF6B6B' }"></div>
+                  <div class="ripple" :style="{ borderColor: currentTheme.color || '#FF6B6B', animationDelay: '1s' }"></div>
+                  <div class="ripple" :style="{ borderColor: currentTheme.color || '#FF6B6B', animationDelay: '2s' }"></div>
                 </div>
                 
                 <div class="progress-ring">
@@ -68,7 +133,7 @@
                       cy="50"
                       r="45"
                       fill="none"
-                      stroke="#FF6B6B"
+                      :stroke="currentTheme.color || '#FF6B6B'"
                       stroke-width="8"
                       :stroke-dasharray="circumference"
                       :stroke-dashoffset="strokeDashoffset"
@@ -146,7 +211,7 @@
               </div>
             </div>
             <div class="no-records" v-else>
-              <el-icon class="no-records-icon"><Headphones /></el-icon>
+              <el-icon class="no-records-icon"><Headset /></el-icon>
               <p>还没有冥想记录</p>
               <p>开始你的第一次正念冥想吧！</p>
             </div>
@@ -156,11 +221,15 @@
     </div>
     
     <AppFooter />
+    
+    <!-- 音频元素 -->
+    <audio ref="guidanceAudio" preload="auto"></audio>
+    <audio ref="musicAudio" preload="auto" loop></audio>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 
@@ -171,28 +240,73 @@ const meditationThemes = ref([
     name: '呼吸冥想',
     description: '专注于呼吸，平静内心',
     duration: 10,
-    icon: 'WindPower'
+    icon: 'WindPower',
+    color: '#4ECDC4',
+    hasGuidance: true,
+    hasMusic: true,
+    guidanceAudio: '/audio/breathing-guidance.mp3'
   },
   {
     id: 'body-scan',
     name: '身体扫描',
     description: '放松身体，释放紧张',
     duration: 15,
-    icon: 'User'
+    icon: 'User',
+    color: '#FF6B6B',
+    hasGuidance: true,
+    hasMusic: true,
+    guidanceAudio: '/audio/body-scan-guidance.mp3'
   },
   {
     id: 'loving-kindness',
     name: '慈爱冥想',
     description: '培养慈悲心，关爱他人',
     duration: 12,
-    icon: 'Heart'
+    icon: 'Heart',
+    color: '#FFD166',
+    hasGuidance: true,
+    hasMusic: true,
+    guidanceAudio: '/audio/loving-kindness-guidance.mp3'
   },
   {
     id: 'mindfulness',
     name: '正念觉察',
     description: '觉察当下，提升专注力',
     duration: 8,
-    icon: 'Sunny'
+    icon: 'Sunny',
+    color: '#6A4C93',
+    hasGuidance: true,
+    hasMusic: true,
+    guidanceAudio: '/audio/mindfulness-guidance.mp3'
+  }
+])
+
+// 背景音乐数据
+const backgroundMusics = ref([
+  {
+    id: 'nature',
+    name: '自然之声',
+    file: '/audio/nature-sounds.mp3'
+  },
+  {
+    id: 'rain',
+    name: '雨声',
+    file: '/audio/rain-sounds.mp3'
+  },
+  {
+    id: 'ocean',
+    name: '海浪声',
+    file: '/audio/ocean-waves.mp3'
+  },
+  {
+    id: 'forest',
+    name: '森林声',
+    file: '/audio/forest-sounds.mp3'
+  },
+  {
+    id: 'meditation',
+    name: '冥想音乐',
+    file: '/audio/meditation-music.mp3'
   }
 ])
 
@@ -205,6 +319,18 @@ const meditationStatus = ref('准备开始')
 
 // 定时器
 let meditationTimer = null
+
+// 音频引用
+const guidanceAudio = ref(null)
+const musicAudio = ref(null)
+
+// 音频设置
+const audioSettings = ref({
+  guidance: true,
+  music: true,
+  selectedMusic: 'nature',
+  volume: 70
+})
 
 // 冥想提示
 const meditationTips = ref([
@@ -246,6 +372,16 @@ const meditationRecords = ref([
 const selectTheme = (themeId) => {
   selectedTheme.value = themeId
   stopMeditation()
+  
+  // 重置音频设置
+  const theme = meditationThemes.value.find(t => t.id === themeId)
+  if (theme) {
+    audioSettings.value.guidance = theme.hasGuidance
+    audioSettings.value.music = theme.hasMusic
+    
+    // 设置主题颜色变量
+    document.documentElement.style.setProperty('--theme-color', theme.color || '#FF6B6B')
+  }
 }
 
 const updateDuration = () => {
@@ -261,6 +397,15 @@ const startMeditation = () => {
   remainingTime.value = selectedDuration.value * 60
   meditationStatus.value = '冥想中...'
   
+  // 启动音频
+  if (audioSettings.value.guidance && currentTheme.value.hasGuidance) {
+    playGuidanceAudio()
+  }
+  
+  if (audioSettings.value.music && currentTheme.value.hasMusic) {
+    playBackgroundMusic()
+  }
+  
   startMeditationTimer()
   startTipRotation()
 }
@@ -269,6 +414,15 @@ const pauseMeditation = () => {
   isPlaying.value = false
   meditationStatus.value = '已暂停'
   clearTimers()
+  
+  // 暂停音频
+  if (guidanceAudio.value) {
+    guidanceAudio.value.pause()
+  }
+  
+  if (musicAudio.value) {
+    musicAudio.value.pause()
+  }
 }
 
 const stopMeditation = () => {
@@ -277,6 +431,9 @@ const stopMeditation = () => {
   remainingTime.value = selectedDuration.value * 60
   currentTipIndex = 0
   clearTimers()
+  
+  // 停止音频
+  stopAudio()
 }
 
 const startMeditationTimer = () => {
@@ -321,6 +478,41 @@ const clearTimers = () => {
   }
 }
 
+const playGuidanceAudio = () => {
+  if (!guidanceAudio.value || !currentTheme.value.guidanceAudio) return
+  
+  guidanceAudio.value.src = currentTheme.value.guidanceAudio
+  guidanceAudio.value.volume = audioSettings.value.volume / 100
+  guidanceAudio.value.play().catch(error => {
+    console.error('播放引导音频失败:', error)
+  })
+}
+
+const playBackgroundMusic = () => {
+  if (!musicAudio.value) return
+  
+  const selectedMusicData = backgroundMusics.value.find(music => music.id === audioSettings.value.selectedMusic)
+  if (selectedMusicData) {
+    musicAudio.value.src = selectedMusicData.file
+    musicAudio.value.volume = audioSettings.value.volume / 100 * 0.7 // 背景音乐音量稍低
+    musicAudio.value.play().catch(error => {
+      console.error('播放背景音乐失败:', error)
+    })
+  }
+}
+
+const stopAudio = () => {
+  if (guidanceAudio.value) {
+    guidanceAudio.value.pause()
+    guidanceAudio.value.currentTime = 0
+  }
+  
+  if (musicAudio.value) {
+    musicAudio.value.pause()
+    musicAudio.value.currentTime = 0
+  }
+}
+
 const formatTime = (seconds) => {
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = seconds % 60
@@ -338,10 +530,24 @@ const formatDate = (date) => {
 
 onMounted(() => {
   // 页面加载时的初始化
+  guidanceAudio.value = document.querySelector('audio[ref="guidanceAudio"]')
+  musicAudio.value = document.querySelector('audio[ref="musicAudio"]')
 })
 
 onUnmounted(() => {
   clearTimers()
+  stopAudio()
+})
+
+// 监听音量变化
+watch(() => audioSettings.value.volume, (newVolume) => {
+  if (guidanceAudio.value) {
+    guidanceAudio.value.volume = newVolume / 100
+  }
+  
+  if (musicAudio.value) {
+    musicAudio.value.volume = newVolume / 100 * 0.7 // 背景音乐音量稍低
+  }
 })
 </script>
 
@@ -351,6 +557,48 @@ onUnmounted(() => {
   background: linear-gradient(135deg, #FFF8DC 0%, #F0F8FF 100%);
   display: flex;
   flex-direction: column;
+}
+
+.audio-settings {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(255, 107, 107, 0.1);
+  margin-bottom: 30px;
+  
+  .settings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .setting-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+  
+  .setting-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #333;
+    font-weight: 500;
+    
+    .el-icon {
+      color: #FF6B6B;
+    }
+  }
+  
+  .volume-slider {
+    width: 200px;
+  }
 }
 
 .main-content {
@@ -421,6 +669,8 @@ onUnmounted(() => {
   text-align: center;
   cursor: pointer;
   transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
   
   &:hover {
     border-color: #FFB6C1;
@@ -428,17 +678,37 @@ onUnmounted(() => {
   }
   
   &.active {
-    border-color: #FF6B6B;
-    background: #FFF0F0;
+    border-color: var(--theme-color, #FF6B6B);
+    background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.15);
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background-color: var(--theme-color, #FF6B6B);
+    }
   }
 }
 
 .theme-icon {
-  color: #FF6B6B;
-  margin-bottom: 15px;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: var(--theme-color, #FF6B6B);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.2);
+  transition: all 0.3s;
   
   .el-icon {
     font-size: 32px;
+    color: white;
   }
 }
 
@@ -517,6 +787,39 @@ onUnmounted(() => {
   background: linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 100%);
   position: relative;
   z-index: 2;
+  transition: all 0.5s ease;
+}
+
+.meditation-ripples {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.ripple {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #FF6B6B;
+  border-radius: 50%;
+  animation: ripple-effect 4s infinite ease-out;
+  opacity: 0;
+}
+
+@keyframes ripple-effect {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
 }
 
 .circle-content {
@@ -716,3 +1019,4 @@ onUnmounted(() => {
   }
 }
 </style>
+

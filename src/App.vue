@@ -93,17 +93,4 @@ body {
   transform: translateY(-20px);
   opacity: 0;
 }
-
-// 响应式断点
-@media (max-width: 768px) {
-  body {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  body {
-    font-size: 12px;
-  }
-}
 </style>

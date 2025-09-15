@@ -1,9 +1,5 @@
 <template>
   <div class="settings-page">
-    <AppHeader />
-    
-    <div class="main-content">
-      <div class="content-container">
         <div class="page-header">
           <h1 class="page-title">
             <el-icon><Setting /></el-icon>
@@ -162,11 +158,7 @@
               保存设置
             </el-button>
           </div>
-        </div>
       </div>
-    </div>
-    
-    <AppFooter />
   </div>
 </template>
 
@@ -175,8 +167,6 @@ import { ref, reactive, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useSettingsStore } from '@/stores/settings'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import AppHeader from '@/components/common/AppHeader.vue'
-import AppFooter from '@/components/common/AppFooter.vue'
 
 const userStore = useUserStore()
 const settingsStore = useSettingsStore()
@@ -332,21 +322,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .settings-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #FFF8DC 0%, #F0F8FF 100%);
-  display: flex;
-  flex-direction: column;
-}
-
-.main-content {
-  flex: 1;
-  padding: 20px 0;
-}
-
-.content-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0 20px;
+  // Layout styles moved to DefaultLayout component
 }
 
 .page-header {

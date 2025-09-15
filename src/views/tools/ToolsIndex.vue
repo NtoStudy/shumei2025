@@ -1,16 +1,12 @@
 <template>
   <div class="tools-page">
-    <AppHeader />
-    
-    <div class="main-content">
-      <div class="content-container">
-        <div class="page-header">
-          <h1 class="page-title">
-            <el-icon><Tools /></el-icon>
-            自助工具
-          </h1>
-          <p class="page-desc">科学有效的心理调节方法，帮助你更好地管理情绪</p>
-        </div>
+    <div class="page-header">
+      <h1 class="page-title">
+        <el-icon><Tools /></el-icon>
+        自助工具
+      </h1>
+      <p class="page-desc">科学有效的心理调节方法，帮助你更好地管理情绪</p>
+    </div>
         
         <div class="tools-grid">
           <div class="tool-card" @click="goToBreathing">
@@ -27,7 +23,7 @@
           
           <div class="tool-card" @click="goToMeditation">
             <div class="tool-icon">
-              <el-icon><Headphones /></el-icon>
+              <el-icon><Headset /></el-icon>
             </div>
             <h3 class="tool-title">正念冥想</h3>
             <p class="tool-desc">提升专注力，培养正念意识，平静内心</p>
@@ -49,7 +45,7 @@
             </div>
           </div>
           
-          <div class="tool-card coming-soon">
+          <div class="tool-card" @click="goToRelaxation">
             <div class="tool-icon">
               <el-icon><Timer /></el-icon>
             </div>
@@ -59,10 +55,9 @@
               <span class="tool-duration">10-15分钟</span>
               <span class="tool-level">初级</span>
             </div>
-            <div class="coming-soon-badge">即将推出</div>
           </div>
           
-          <div class="tool-card coming-soon">
+          <div class="tool-card" @click="goToStressManagement">
             <div class="tool-icon">
               <el-icon><TrendCharts /></el-icon>
             </div>
@@ -72,10 +67,9 @@
               <span class="tool-duration">20-30分钟</span>
               <span class="tool-level">中级</span>
             </div>
-            <div class="coming-soon-badge">即将推出</div>
           </div>
           
-          <div class="tool-card coming-soon">
+          <div class="tool-card" @click="goToEmotionRegulation">
             <div class="tool-icon">
               <el-icon><Star /></el-icon>
             </div>
@@ -85,7 +79,6 @@
               <span class="tool-duration">5-15分钟</span>
               <span class="tool-level">初级</span>
             </div>
-            <div class="coming-soon-badge">即将推出</div>
           </div>
         </div>
         
@@ -124,18 +117,12 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
     </div>
-    
-    <AppFooter />
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
-import AppHeader from '@/components/common/AppHeader.vue'
-import AppFooter from '@/components/common/AppFooter.vue'
 
 const router = useRouter()
 
@@ -150,25 +137,23 @@ const goToMeditation = () => {
 const goToCognition = () => {
   router.push('/tools/cognition')
 }
+
+const goToRelaxation = () => {
+  router.push('/tools/relaxation')
+}
+
+const goToStressManagement = () => {
+  router.push('/tools/stress-management')
+}
+
+const goToEmotionRegulation = () => {
+  router.push('/tools/emotion-regulation')
+}
 </script>
 
 <style scoped lang="scss">
 .tools-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #FFF8DC 0%, #F0F8FF 100%);
-  display: flex;
-  flex-direction: column;
-}
-
-.main-content {
-  flex: 1;
-  padding: 20px 0;
-}
-
-.content-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+  // Layout styles moved to DefaultLayout component
 }
 
 .page-header {
@@ -330,25 +315,6 @@ const goToCognition = () => {
     color: #999;
     font-size: 12px;
     margin: 0;
-  }
-}
-
-@media (max-width: 768px) {
-  .page-title {
-    font-size: 24px;
-  }
-  
-  .tools-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .stat-card {
-    flex-direction: column;
-    text-align: center;
   }
 }
 </style>

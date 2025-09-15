@@ -1,38 +1,28 @@
 <template>
   <div class="community-page">
-    <AppHeader />
-    
-    <div class="main-content">
-      <div class="content-container">
-        <div class="page-header">
-          <h1 class="page-title">
-            <el-icon><ChatDotRound /></el-icon>
-            社区互助
-          </h1>
-          <p class="page-desc">在这里分享心情，获得同龄人的理解和支持</p>
-        </div>
-        
-        <div class="community-tabs">
-          <el-tabs v-model="activeTab" @tab-click="handleTabClick">
-            <el-tab-pane label="匿名树洞" name="treehole">
-              <Treehole />
-            </el-tab-pane>
-            <el-tab-pane label="互助小组" name="groups">
-              <Groups />
-            </el-tab-pane>
-          </el-tabs>
-        </div>
-      </div>
+    <div class="page-header">
+      <h1 class="page-title">
+        <el-icon><ChatDotRound /></el-icon>
+        社区互助
+      </h1>
+      <p class="page-desc">在这里分享心情，获得同龄人的理解和支持</p>
     </div>
     
-    <AppFooter />
+    <div class="community-tabs">
+      <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+        <el-tab-pane label="匿名树洞" name="treehole">
+          <Treehole />
+        </el-tab-pane>
+        <el-tab-pane label="互助小组" name="groups">
+          <Groups />
+        </el-tab-pane>
+      </el-tabs>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import AppHeader from '@/components/common/AppHeader.vue'
-import AppFooter from '@/components/common/AppFooter.vue'
 import Treehole from './Treehole.vue'
 import Groups from './Groups.vue'
 
@@ -45,21 +35,7 @@ const handleTabClick = (tab) => {
 
 <style scoped lang="scss">
 .community-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #FFF8DC 0%, #F0F8FF 100%);
-  display: flex;
-  flex-direction: column;
-}
-
-.main-content {
-  flex: 1;
-  padding: 20px 0;
-}
-
-.content-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+  // Layout styles moved to DefaultLayout component
 }
 
 .page-header {

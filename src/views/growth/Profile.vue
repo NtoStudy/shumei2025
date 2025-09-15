@@ -163,7 +163,7 @@ const achievements = ref([
   { id: 'week_streak', name: '连续一周', icon: 'Calendar' },
   { id: 'month_streak', name: '连续一月', icon: 'Trophy' },
   { id: 'first_breathing', name: '呼吸练习', icon: 'WindPower' },
-  { id: 'first_meditation', name: '冥想入门', icon: 'Headphones' },
+  { id: 'first_meditation', name: '冥想入门', icon: 'Headset' },
   { id: 'community_helper', name: '社区助手', icon: 'ChatDotRound' },
   { id: 'data_analyst', name: '数据分析师', icon: 'TrendCharts' },
   { id: 'goal_achiever', name: '目标达成者', icon: 'Star' }

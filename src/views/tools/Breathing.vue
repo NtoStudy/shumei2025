@@ -1,9 +1,5 @@
 <template>
   <div class="breathing-page">
-    <AppHeader />
-    
-    <div class="main-content">
-      <div class="content-container">
         <div class="page-header">
           <h1 class="page-title">
             <el-icon><WindPower /></el-icon>
@@ -47,16 +43,20 @@
                 :class="{ 
                   'inhale': isInhaling, 
                   'exhale': isExhaling,
-                  'hold': isHolding 
+                  'hold': isHolding,
+                  [`animation-${currentPattern.animation || 'circle'}`]: true
                 }"
                 :style="{ 
                   transform: `scale(${circleScale})`,
-                  opacity: circleOpacity
+                  opacity: circleOpacity,
+                  '--primary-color': currentPattern.color || '#FF6B6B',
+                  '--secondary-color': currentPattern.color ? `${currentPattern.color}33` : '#FF6B6B33'
                 }"
               >
                 <div class="circle-content">
                   <div class="breathing-text">{{ breathingText }}</div>
                   <div class="breathing-count">{{ breathingCount }}</div>
+                  <div class="breathing-guidance" v-if="!isRunning && currentPattern.guidance">{{ currentPattern.guidance }}</div>
                 </div>
               </div>
             </div>
@@ -133,17 +133,11 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    
-    <AppFooter />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import AppHeader from '@/components/common/AppHeader.vue'
-import AppFooter from '@/components/common/AppFooter.vue'
 
 // 呼吸模式数据
 const breathingPatterns = ref([
@@ -156,7 +150,10 @@ const breathingPatterns = ref([
     inhale: 4,
     hold1: 4,
     exhale: 4,
-    hold2: 4
+    hold2: 4,
+    color: '#4ECDC4',
+    animation: 'square',
+    guidance: '通过鼻子缓慢吸气，感受腹部扩张，然后屏住呼吸，通过嘴巴缓慢呼气，再次屏住呼吸。'
   },
   {
     id: '4-7-8',
@@ -167,7 +164,10 @@ const breathingPatterns = ref([
     inhale: 4,
     hold1: 7,
     exhale: 8,
-    hold2: 0
+    hold2: 0,
+    color: '#FF6B6B',
+    animation: 'wave',
+    guidance: '通过鼻子安静地吸气，屏住呼吸，然后通过嘴巴发出"嘘"的声音缓慢呼气，直到肺部完全排空。'
   },
   {
     id: 'box',
@@ -178,7 +178,10 @@ const breathingPatterns = ref([
     inhale: 4,
     hold1: 4,
     exhale: 4,
-    hold2: 4
+    hold2: 4,
+    color: '#5A67D8',
+    animation: 'square',
+    guidance: '想象沿着一个正方形的边缘呼吸：上边吸气，右边屏气，下边呼气，左边屏气，形成一个完整的循环。'
   },
   {
     id: 'triangle',
@@ -189,7 +192,38 @@ const breathingPatterns = ref([
     inhale: 4,
     hold1: 4,
     exhale: 4,
-    hold2: 0
+    hold2: 0,
+    color: '#F4A261',
+    animation: 'circle',
+    guidance: '想象沿着三角形的边缘呼吸：第一边吸气，第二边屏气，第三边呼气，形成一个完整的循环。'
+  },
+  {
+    id: 'coherent',
+    name: '共振呼吸法',
+    description: '吸气5秒，呼气5秒，形成共振频率',
+    duration: 7,
+    icon: 'Connection',
+    inhale: 5,
+    hold1: 0,
+    exhale: 5,
+    hold2: 0,
+    color: '#2A9D8F',
+    animation: 'wave',
+    guidance: '以每分钟约6次的频率呼吸，吸气和呼气时间相等，创造心脏、呼吸和神经系统之间的和谐。'
+  },
+  {
+    id: 'alternate',
+    name: '交替鼻孔呼吸法',
+    description: '左右鼻孔交替呼吸',
+    duration: 9,
+    icon: 'Switch',
+    inhale: 4,
+    hold1: 2,
+    exhale: 4,
+    hold2: 0,
+    color: '#E76F51',
+    animation: 'alternate',
+    guidance: '用右手拇指关闭右鼻孔，从左鼻孔吸气，然后换用无名指关闭左鼻孔，从右鼻孔呼气，再从右鼻孔吸气，左鼻孔呼气，形成一个完整循环。'
   }
 ])
 
@@ -395,21 +429,7 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 .breathing-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #FFF8DC 0%, #F0F8FF 100%);
-  display: flex;
-  flex-direction: column;
-}
-
-.main-content {
-  flex: 1;
-  padding: 20px 0;
-}
-
-.content-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 20px;
+  // Layout styles moved to DefaultLayout component
 }
 
 .page-header {
@@ -550,13 +570,15 @@ onUnmounted(() => {
 .breathing-circle {
   width: 200px;
   height: 200px;
-  border: 4px solid #FF6B6B;
+  border: 4px solid var(--primary-color, #FF6B6B);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.5s ease;
-  background: linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 100%);
+  background: linear-gradient(135deg, var(--primary-color, #FFB6C1) 0%, var(--secondary-color, #FFC0CB) 100%);
+  position: relative;
+  overflow: hidden;
   
   &.inhale {
     border-color: #87CEEB;
@@ -571,6 +593,77 @@ onUnmounted(() => {
   &.hold {
     border-color: #DDA0DD;
     background: linear-gradient(135deg, #DDA0DD 0%, #EE82EE 100%);
+  }
+  
+  &.animation-square {
+    border-radius: 15px;
+    
+    &.inhale {
+      transform: scale(1.2) rotate(0deg) !important;
+    }
+    
+    &.hold {
+      transform: scale(1.2) rotate(90deg) !important;
+    }
+    
+    &.exhale {
+      transform: scale(0.8) rotate(180deg) !important;
+    }
+  }
+  
+  &.animation-wave {
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50% 50% 0 0;
+      transition: height 1s ease;
+    }
+    
+    &.inhale::before {
+      height: 80%;
+    }
+    
+    &.exhale::before {
+      height: 20%;
+    }
+  }
+  
+  &.animation-alternate {
+    position: relative;
+    overflow: hidden;
+    
+    &::before, &::after {
+      content: '';
+      position: absolute;
+      width: 50%;
+      height: 100%;
+      top: 0;
+      background: rgba(255, 255, 255, 0.2);
+      transition: opacity 1s ease;
+    }
+    
+    &::before {
+      left: 0;
+      opacity: 0;
+    }
+    
+    &::after {
+      right: 0;
+      opacity: 0;
+    }
+    
+    &.inhale::before {
+      opacity: 1;
+    }
+    
+    &.exhale::after {
+      opacity: 1;
+    }
   }
 }
 
@@ -587,6 +680,17 @@ onUnmounted(() => {
   .breathing-count {
     font-size: 16px;
     color: #666;
+    margin-bottom: 8px;
+  }
+  
+  .breathing-guidance {
+    color: #333;
+    font-size: 14px;
+    text-align: center;
+    max-width: 90%;
+    line-height: 1.4;
+    opacity: 0.9;
+    margin-top: 10px;
   }
 }
 

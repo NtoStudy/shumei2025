@@ -1,41 +1,31 @@
 <template>
   <div class="resources-page">
-    <AppHeader />
-    
-    <div class="main-content">
-      <div class="content-container">
-        <div class="page-header">
-          <h1 class="page-title">
-            <el-icon><Reading /></el-icon>
-            专业资源
-          </h1>
-          <p class="page-desc">科学可靠的心理健康知识和专业资源</p>
-        </div>
-        
-        <div class="resources-tabs">
-          <el-tabs v-model="activeTab" @tab-click="handleTabClick">
-            <el-tab-pane label="知识库" name="knowledge">
-              <Knowledge />
-            </el-tab-pane>
-            <el-tab-pane label="心理测试" name="tests">
-              <Tests />
-            </el-tab-pane>
-            <el-tab-pane label="危机干预" name="crisis">
-              <Crisis />
-            </el-tab-pane>
-          </el-tabs>
-        </div>
-      </div>
+    <div class="page-header">
+      <h1 class="page-title">
+        <el-icon><Reading /></el-icon>
+        专业资源
+      </h1>
+      <p class="page-desc">科学可靠的心理健康知识和专业资源</p>
     </div>
     
-    <AppFooter />
+    <div class="resources-tabs">
+      <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+        <el-tab-pane label="知识库" name="knowledge">
+          <Knowledge />
+        </el-tab-pane>
+        <el-tab-pane label="心理测试" name="tests">
+          <Tests />
+        </el-tab-pane>
+        <el-tab-pane label="危机干预" name="crisis">
+          <Crisis />
+        </el-tab-pane>
+      </el-tabs>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import AppHeader from '@/components/common/AppHeader.vue'
-import AppFooter from '@/components/common/AppFooter.vue'
 import Knowledge from './Knowledge.vue'
 import Tests from './Tests.vue'
 import Crisis from './Crisis.vue'
@@ -49,21 +39,7 @@ const handleTabClick = (tab) => {
 
 <style scoped lang="scss">
 .resources-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #FFF8DC 0%, #F0F8FF 100%);
-  display: flex;
-  flex-direction: column;
-}
-
-.main-content {
-  flex: 1;
-  padding: 20px 0;
-}
-
-.content-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+  // Layout styles moved to DefaultLayout component
 }
 
 .page-header {
