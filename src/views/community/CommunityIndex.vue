@@ -23,7 +23,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import Treehole from './Treehole.vue'
+import Treehole from './TreeholeEnhanced.vue'
 import Groups from './Groups.vue'
 
 const activeTab = ref('treehole')

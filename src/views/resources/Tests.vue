@@ -178,7 +178,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import { 
@@ -191,6 +191,7 @@ import {
   MagicStick,
   Sunny
 } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 
@@ -873,15 +874,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.tests-page {
-  padding: 2rem 0;
-}
-
-.tests-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
+// 作为子路由，不需要额外的页面级padding和容器样式
 
 .section-title {
   font-size: 1.5rem;

@@ -133,7 +133,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+
+const router = useRouter()
 
 const searchKeyword = ref('')
 const selectedCategory = ref('all')
@@ -349,8 +352,8 @@ const formatDate = (date) => {
 }
 
 const viewArticle = (article) => {
-  selectedArticle.value = article
-  articleDialogVisible.value = true
+  // 跳转到独立的文章详情页面
+  router.push(`/article/${article.id}`)
 }
 
 const handleCloseDialog = () => {
@@ -380,9 +383,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.knowledge-page {
-  padding: 20px 0;
-}
+// 作为子路由，不需要额外的页面级padding
 
 .knowledge-container {
   display: flex;

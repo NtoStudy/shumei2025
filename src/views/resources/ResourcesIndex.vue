@@ -11,30 +11,57 @@
     <div class="resources-tabs">
       <el-tabs v-model="activeTab" @tab-click="handleTabClick">
         <el-tab-pane label="知识库" name="knowledge">
-          <Knowledge />
         </el-tab-pane>
         <el-tab-pane label="心理测试" name="tests">
-          <Tests />
         </el-tab-pane>
         <el-tab-pane label="危机干预" name="crisis">
-          <Crisis />
         </el-tab-pane>
       </el-tabs>
+      
+      <!-- 子路由内容显示区域 -->
+      <div class="tab-content">
+        <router-view />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import Knowledge from './Knowledge.vue'
-import Tests from './Tests.vue'
-import Crisis from './Crisis.vue'
+import { ref, watch, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+
+const router = useRouter()
+const route = useRoute()
 
 const activeTab = ref('knowledge')
 
+// 监听路由变化，更新活跃标签
+watch(() => route.path, (newPath) => {
+  if (newPath.includes('/resources/knowledge')) {
+    activeTab.value = 'knowledge'
+  } else if (newPath.includes('/resources/tests')) {
+    activeTab.value = 'tests'
+  } else if (newPath.includes('/resources/crisis')) {
+    activeTab.value = 'crisis'
+  }
+}, { immediate: true })
+
 const handleTabClick = (tab) => {
-  // 可以在这里添加切换标签页的逻辑
+  // 根据标签切换路由
+  router.push(`/resources/${tab.paneName}`)
 }
+
+// 组件挂载时设置正确的活跃标签
+onMounted(() => {
+  const currentPath = route.path
+  if (currentPath.includes('/resources/tests')) {
+    activeTab.value = 'tests'
+  } else if (currentPath.includes('/resources/crisis')) {
+    activeTab.value = 'crisis'
+  } else {
+    activeTab.value = 'knowledge'
+  }
+})
 </script>
 
 <style scoped lang="scss">
@@ -90,6 +117,10 @@ const handleTabClick = (tab) => {
   
   :deep(.el-tabs__active-bar) {
     background: #FF6B6B;
+  }
+  
+  .tab-content {
+    margin-top: 20px;
   }
 }
 

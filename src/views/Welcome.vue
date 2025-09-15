@@ -78,23 +78,23 @@
         <p class="cta-desc">匿名、安全、温暖的心理健康陪伴</p>
         
         <div class="cta-actions">
-          <el-button 
-            type="primary" 
-            size="large" 
-            @click="goToRegister"
-            class="primary-btn"
-          >
-            <el-icon><UserFilled /></el-icon>
-            立即注册
-          </el-button>
-          <el-button 
-            size="large" 
-            @click="goToLogin"
-            class="secondary-btn"
-          >
-            <el-icon><User /></el-icon>
-            已有账户？登录
-          </el-button>
+            <el-button 
+              type="primary" 
+              size="large" 
+              @click="startGuide"
+              class="primary-btn"
+            >
+              <el-icon><UserFilled /></el-icon>
+              开始使用
+            </el-button>
+            <el-button 
+              size="large" 
+              @click="goToLogin"
+              class="secondary-btn"
+            >
+              <el-icon><User /></el-icon>
+              已有账户？登录
+            </el-button>
         </div>
         
         <div class="privacy-info">
@@ -201,14 +201,21 @@
         <el-button @click="privacyVisible = false">关闭</el-button>
       </template>
     </el-dialog>
+    
+    <!-- 首次使用引导 -->
+    <FirstTimeGuide 
+      v-model="showGuide" 
+      @complete="completeGuide"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
+import FirstTimeGuide from '@/components/common/FirstTimeGuide.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -217,6 +224,7 @@ const privacyVisible = ref(false)
 const agreementVisible = ref(false)
 const featureDetailVisible = ref(false)
 const selectedFeature = ref(null)
+const showGuide = ref(false)
 
 const features = ref([
   {
@@ -356,6 +364,23 @@ const goToLogin = () => {
 const goToRegister = () => {
   router.push('/register')
 }
+
+const startGuide = () => {
+  showGuide.value = true
+}
+
+const completeGuide = () => {
+  // 引导完成后跳转到首页
+  router.push('/home')
+}
+
+// 检查是否为首次使用
+onMounted(() => {
+  console.log('Welcome页面加载，检查首次使用状态:', {
+    isFirstTime: userStore.isFirstTime,
+    nickname: userStore.profile.nickname
+  })
+})
 </script>
 
 <style scoped lang="scss">

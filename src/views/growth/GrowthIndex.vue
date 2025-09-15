@@ -23,7 +23,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import Profile from './Profile.vue'
+import Profile from './ProfileEnhanced.vue'
 import Report from './Report.vue'
 
 const activeTab = ref('profile')

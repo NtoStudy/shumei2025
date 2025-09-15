@@ -173,17 +173,17 @@ const recommendations = ref([
   },
   {
     id: 2,
-    title: '正念呼吸练习',
-    description: '跟着音频进行5分钟的正念呼吸练习',
-    type: '音频',
-    time: '5分钟'
+    title: '正念呼吸练习指南',
+    description: '正念呼吸是一种简单而有效的放松技巧，可以帮助你在紧张时刻快速平静心情',
+    type: '文章',
+    time: '6分钟阅读' 
   },
   {
     id: 3,
-    title: '情绪管理小组',
-    description: '加入我们的情绪管理讨论小组',
-    type: '社区',
-    time: '随时参与'
+    title: '大学生情绪管理完全指南',
+    description: '大学生活充满挑战，学会管理情绪是成功的关键',
+    type: '文章',
+    time: '12分钟阅读'
   }
 ])
 
@@ -240,7 +240,8 @@ const viewRecommendation = (item) => {
   // 根据推荐类型跳转到不同页面
   switch (item.type) {
     case '文章':
-      router.push('/resources/knowledge')
+      // 跳转到具体文章详情页面
+      router.push(`/article/${item.id}`)
       break
     case '音频':
       router.push('/tools/meditation')
@@ -258,9 +259,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.home-page {
-  // Layout styles moved to DefaultLayout component
-}
+// Layout styles moved to DefaultLayout component
 
 .welcome-section {
   margin-bottom: 30px;

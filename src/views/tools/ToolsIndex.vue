@@ -13,12 +13,13 @@
             <div class="tool-icon">
               <el-icon><WindPower /></el-icon>
             </div>
-            <h3 class="tool-title">呼吸练习</h3>
-            <p class="tool-desc">通过科学的呼吸方法缓解焦虑，放松身心</p>
+            <h3 class="tool-title">呼吸练习 Plus</h3>
+            <p class="tool-desc">多种科学呼吸模式，统计分析，个性化设置</p>
             <div class="tool-meta">
-              <span class="tool-duration">5-10分钟</span>
-              <span class="tool-level">初级</span>
+              <span class="tool-duration">3-20分钟</span>
+              <span class="tool-level">全级别</span>
             </div>
+            <div class="tool-badge">增强版</div>
           </div>
 
           <div class="tool-card" @click="goToMeditation">
@@ -92,7 +93,7 @@
               </div>
               <div class="stat-content">
                 <h4>总练习时间</h4>
-                <p class="stat-number">0</p>
+                <p class="stat-number">{{ toolsStore.totalUsageTime }}</p>
                 <p class="stat-desc">分钟</p>
               </div>
             </div>
@@ -102,7 +103,7 @@
               </div>
               <div class="stat-content">
                 <h4>完成次数</h4>
-                <p class="stat-number">0</p>
+                <p class="stat-number">{{ toolsStore.totalUsageCount }}</p>
                 <p class="stat-desc">次</p>
               </div>
             </div>
@@ -112,7 +113,7 @@
               </div>
               <div class="stat-content">
                 <h4>连续天数</h4>
-                <p class="stat-number">0</p>
+                <p class="stat-number">{{ toolsStore.consecutiveDays }}</p>
                 <p class="stat-desc">天</p>
               </div>
             </div>
@@ -122,9 +123,12 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useToolsStore } from '@/stores/tools'
 
 const router = useRouter()
+const toolsStore = useToolsStore()
 
 const goToBreathing = () => {
   router.push('/tools/breathing')
@@ -149,12 +153,14 @@ const goToStressManagement = () => {
 const goToEmotionRegulation = () => {
   router.push('/tools/emotion-regulation')
 }
+
+// 初始化工具数据
+onMounted(() => {
+  toolsStore.initializeStore()
+})
 </script>
 
 <style scoped lang="scss">
-.tools-page {
-  // Layout styles moved to DefaultLayout component
-}
 
 .page-header {
   text-align: center;
@@ -202,6 +208,18 @@ const goToEmotionRegulation = () => {
   &.coming-soon {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+  
+  .tool-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: linear-gradient(135deg, #10B981, #34D399);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 500;
   }
 }
 

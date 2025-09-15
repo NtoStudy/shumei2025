@@ -83,7 +83,7 @@ const routes = [
           {
             path: 'treehole',
             name: 'Treehole',
-            component: () => import('@/views/community/Treehole.vue')
+            component: () => import('@/views/community/TreeholeEnhanced.vue')
           },
           {
             path: 'groups',
@@ -100,7 +100,7 @@ const routes = [
           {
             path: 'profile',
             name: 'Profile',
-            component: () => import('@/views/growth/Profile.vue')
+            component: () => import('@/views/growth/ProfileEnhanced.vue')
           },
           {
             path: 'report',
@@ -113,6 +113,7 @@ const routes = [
         path: '/resources',
         name: 'Resources',
         component: () => import('@/views/resources/ResourcesIndex.vue'),
+        redirect: '/resources/knowledge',
         children: [
           {
             path: 'knowledge',
@@ -139,7 +140,7 @@ const routes = [
       {
         path: '/tools/breathing',
         name: 'Breathing',
-        component: () => import('@/views/tools/Breathing.vue')
+        component: () => import('@/views/tools/BreathingEnhanced.vue')
       },
       {
         path: '/tools/meditation',
@@ -165,6 +166,11 @@ const routes = [
         path: '/tools/emotion-regulation',
         name: 'EmotionRegulation',
         component: () => import('@/views/tools/EmotionRegulation.vue')
+      },
+      {
+        path: '/article/:id',
+        name: 'ArticleDetail',
+        component: () => import('@/views/ArticleDetail.vue')
       }
     ]
   },
@@ -200,5 +206,37 @@ const router = createRouter({
   routes
 })
 
+// 路由守卫
+router.beforeEach((to, from, next) => {
+  // 动态导入用户store
+  import('@/stores/user').then(({ useUserStore }) => {
+    const userStore = useUserStore()
+    
+    // 检查路由是否需要认证
+    if (to.meta.requiresAuth) {
+      // 检查用户是否已完成初始设置
+      if (userStore.isFirstTime) {
+        // 首次使用，引导到欢迎页面
+        next('/')
+        return
+      }
+      
+      // 检查是否有用户昵称（简单的认证检查）
+      if (!userStore.profile.nickname) {
+        // 没有完成注册，跳转到登录页
+        next('/login')
+        return
+      }
+    }
+    
+    // 如果已登录用户访问登录/注册页面，重定向到首页
+    if ((to.name === 'Login' || to.name === 'Register') && userStore.profile.nickname) {
+      next('/home')
+      return
+    }
+    
+    next()
+  })
+})
 
 export default router

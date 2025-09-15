@@ -1,81 +1,201 @@
 <template>
-  <div class="emotion-chart">
-    <div class="chart-container">
-      <!-- 图表控制面板 -->
-      <div class="chart-controls">
-        <div class="period-selector">
-          <el-radio-group v-model="selectedPeriod" @change="updateChart">
-            <el-radio-button label="week">最近一周</el-radio-button>
-            <el-radio-button label="month">最近一月</el-radio-button>
-            <el-radio-button label="year">最近一年</el-radio-button>
+  <div class="emotion-chart-page">
+    <div class="chart-header">
+      <h1 class="page-title">
+        <el-icon><TrendCharts /></el-icon>
+        情绪图谱
+      </h1>
+      <p class="page-desc">直观了解你的情绪变化趋势，发现情绪规律</p>
+    </div>
+    
+    <!-- 时间选择器 -->
+    <div class="time-selector">
+      <el-radio-group v-model="selectedPeriod" @change="updateCharts" class="period-buttons">
+        <el-radio-button label="day">今日</el-radio-button>
+        <el-radio-button label="week">本周</el-radio-button>
+        <el-radio-button label="month">本月</el-radio-button>
+        <el-radio-button label="year">本年</el-radio-button>
           </el-radio-group>
+      
+      <div class="date-range">
+        <span class="date-text">{{ dateRangeText }}</span>
         </div>
-        <div class="chart-actions">
-          <el-button @click="exportData" class="export-btn">
+    </div>
+    
+    <!-- 数据概览 -->
+    <div class="overview-section">
+      <h3 class="section-title">数据概览</h3>
+      <div class="overview-cards">
+        <div class="overview-card">
+          <div class="card-icon">
+            <el-icon><Sunny /></el-icon>
+          </div>
+          <div class="card-content">
+            <h4>记录总数</h4>
+            <p class="card-number">{{ emotionStore.emotions.length }}</p>
+            <p class="card-desc">条情绪记录</p>
+          </div>
+        </div>
+        
+        <div class="overview-card">
+          <div class="card-icon">
+            <el-icon><TrendCharts /></el-icon>
+          </div>
+          <div class="card-content">
+            <h4>平均强度</h4>
+            <p class="card-number">{{ averageIntensity }}</p>
+            <p class="card-desc">分 (满分10分)</p>
+          </div>
+        </div>
+        
+        <div class="overview-card">
+          <div class="card-icon">
+            <el-icon><Calendar /></el-icon>
+          </div>
+          <div class="card-content">
+            <h4>记录天数</h4>
+            <p class="card-number">{{ recordDays }}</p>
+            <p class="card-desc">天</p>
+          </div>
+        </div>
+        
+        <div class="overview-card">
+          <div class="card-icon">
+            <el-icon><Star /></el-icon>
+          </div>
+          <div class="card-content">
+            <h4>主要情绪</h4>
+            <p class="card-number">{{ dominantEmotion.label }}</p>
+            <p class="card-desc">{{ dominantEmotion.emoji }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 图表区域 -->
+    <div class="charts-section">
+      <!-- 情绪趋势图 -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <el-icon><TrendCharts /></el-icon>
+            情绪趋势变化
+          </h3>
+          <el-button @click="exportTrendData" size="small" type="text">
             <el-icon><Download /></el-icon>
             导出数据
           </el-button>
         </div>
+        <div ref="trendChartRef" class="chart-content" style="height: 400px;"></div>
+        <div v-if="!filteredEmotions.length" class="empty-chart">
+          <el-icon class="empty-icon"><DocumentRemove /></el-icon>
+          <p>暂无数据</p>
+          <p class="empty-tip">开始记录情绪，查看变化趋势</p>
+      </div>
       </div>
       
-      <!-- 情绪趋势图 -->
-      <div class="chart-section">
-        <h3 class="chart-title">情绪变化趋势</h3>
-        <div ref="trendChart" class="chart" id="trendChart"></div>
-      </div>
-      
-      <!-- 情绪分布图 -->
-      <div class="chart-section">
-        <h3 class="chart-title">情绪分布</h3>
-        <div ref="distributionChart" class="chart" id="distributionChart"></div>
+      <!-- 情绪分布饼图 -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <el-icon><PieChart /></el-icon>
+            情绪类型分布
+          </h3>
+          <el-button @click="exportDistributionData" size="small" type="text">
+            <el-icon><Download /></el-icon>
+            导出数据
+          </el-button>
+        </div>
+        <div ref="distributionChartRef" class="chart-content" style="height: 400px;"></div>
+        <div v-if="!filteredEmotions.length" class="empty-chart">
+          <el-icon class="empty-icon"><PieChart /></el-icon>
+          <p>暂无数据</p>
+          <p class="empty-tip">记录多种情绪类型，查看分布情况</p>
+        </div>
       </div>
       
       <!-- 情绪强度热力图 -->
-      <div class="chart-section">
-        <h3 class="chart-title">情绪强度热力图</h3>
-        <div ref="heatmapChart" class="chart" id="heatmapChart"></div>
+      <div class="chart-container full-width">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <el-icon><Grid /></el-icon>
+            情绪强度热力图
+          </h3>
+          <el-button @click="exportHeatmapData" size="small" type="text">
+            <el-icon><Download /></el-icon>
+            导出数据
+          </el-button>
       </div>
+        <div ref="heatmapChartRef" class="chart-content" style="height: 300px;"></div>
+        <div v-if="!filteredEmotions.length" class="empty-chart">
+          <el-icon class="empty-icon"><Grid /></el-icon>
+          <p>暂无数据</p>
+          <p class="empty-tip">记录情绪一段时间后，查看时间分布热力图</p>
+            </div>
+            </div>
+          </div>
+    
+    <!-- 情绪记录列表 -->
+    <div class="records-section">
+      <div class="section-header">
+        <h3 class="section-title">
+          <el-icon><List /></el-icon>
+          {{ selectedPeriod === 'day' ? '今日' : '近期' }}情绪记录
+        </h3>
+        <el-button @click="goToEmotionDiary" type="primary" size="small">
+          <el-icon><Plus /></el-icon>
+          添加记录
+        </el-button>
+            </div>
       
-      <!-- 统计信息 -->
-      <div class="stats-section">
-        <h3 class="chart-title">统计信息</h3>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-icon">
-              <el-icon><Sunny /></el-icon>
+      <div class="records-list">
+        <div 
+          v-for="emotion in recentEmotions" 
+          :key="emotion.id"
+          class="emotion-record"
+        >
+          <div class="record-time">
+            <span class="time">{{ formatTime(emotion.timestamp) }}</span>
+            <span class="date">{{ formatDate(emotion.timestamp) }}</span>
             </div>
-            <div class="stat-content">
-              <h4>总记录数</h4>
-              <p class="stat-number">{{ emotionStore.emotions.length }}</p>
+          <div class="record-emotion">
+            <div class="emotion-display">
+              <span class="emotion-emoji">{{ emotion.emotion.emoji }}</span>
+              <span class="emotion-type">{{ getEmotionLabel(emotion.emotion.type) }}</span>
+          </div>
+            <div class="emotion-intensity">
+              <span class="intensity-label">强度:</span>
+              <div class="intensity-bar">
+                <div 
+                  class="intensity-fill" 
+                  :style="{ width: (emotion.emotion.intensity * 10) + '%' }"
+                ></div>
+            </div>
+              <span class="intensity-value">{{ emotion.emotion.intensity }}/10</span>
             </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon">
-              <el-icon><TrendCharts /></el-icon>
+          <div class="record-content" v-if="emotion.content">
+            <p>{{ emotion.content }}</p>
             </div>
-            <div class="stat-content">
-              <h4>平均强度</h4>
-              <p class="stat-number">{{ emotionStore.emotionStats.avgIntensity || 0 }}</p>
-            </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon">
-              <el-icon><Calendar /></el-icon>
-            </div>
-            <div class="stat-content">
-              <h4>连续记录</h4>
-              <p class="stat-number">{{ consecutiveDays }}</p>
+          <div class="record-tags" v-if="emotion.tags && emotion.tags.length">
+            <el-tag 
+              v-for="tag in emotion.tags" 
+              :key="tag"
+              size="small"
+              class="emotion-tag"
+            >
+              {{ tag }}
+            </el-tag>
             </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon">
-              <el-icon><Star /></el-icon>
-            </div>
-            <div class="stat-content">
-              <h4>最常情绪</h4>
-              <p class="stat-number">{{ mostCommonEmotion }}</p>
-            </div>
-          </div>
+        
+        <div v-if="!recentEmotions.length" class="empty-records">
+          <el-icon class="empty-icon"><DocumentRemove /></el-icon>
+          <p>{{ selectedPeriod === 'day' ? '今日' : '该时间段' }}暂无情绪记录</p>
+          <el-button type="primary" @click="goToEmotionDiary">
+            <el-icon><Plus /></el-icon>
+            现在就记录一下吧
+          </el-button>
         </div>
       </div>
     </div>
@@ -83,46 +203,25 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import { useEmotionStore } from '@/stores/emotion'
-import * as echarts from 'echarts'
 import { ElMessage } from 'element-plus'
+import * as echarts from 'echarts'
 
+const router = useRouter()
 const emotionStore = useEmotionStore()
 
 const selectedPeriod = ref('week')
-const trendChart = ref(null)
-const distributionChart = ref(null)
-const heatmapChart = ref(null)
+const trendChartRef = ref()
+const distributionChartRef = ref()
+const heatmapChartRef = ref()
 
-// 计算属性
-const consecutiveDays = computed(() => {
-  // 计算连续记录天数
-  const emotions = emotionStore.emotions
-  if (emotions.length === 0) return 0
-  
-  let days = 1
-  const today = new Date()
-  
-  for (let i = emotions.length - 1; i > 0; i--) {
-    const currentDate = new Date(emotions[i].timestamp)
-    const previousDate = new Date(emotions[i - 1].timestamp)
-    const diffDays = Math.floor((currentDate - previousDate) / (1000 * 60 * 60 * 24))
-    
-    if (diffDays === 1) {
-      days++
-    } else {
-      break
-    }
-  }
-  
-  return days
-})
+let trendChart = null
+let distributionChart = null
+let heatmapChart = null
 
-const mostCommonEmotion = computed(() => {
-  const distribution = emotionStore.emotionDistribution
-  if (Object.keys(distribution).length === 0) return '无'
-  
+// 情绪类型标签映射
   const emotionLabels = {
     'happy': '开心',
     'sad': '难过',
@@ -131,95 +230,216 @@ const mostCommonEmotion = computed(() => {
     'calm': '平静',
     'excited': '兴奋',
     'tired': '疲惫',
-    'confused': '困惑'
-  }
-  
-  const mostCommon = Object.keys(distribution).reduce((a, b) => 
-    distribution[a] > distribution[b] ? a : b
-  )
-  
-  return emotionLabels[mostCommon] || mostCommon
-})
-
-// 图表初始化
-const initCharts = async () => {
-  await nextTick()
-  
-  // 使用setTimeout确保DOM已完全渲染
-  setTimeout(() => {
-    initTrendChart()
-    initDistributionChart()
-    initHeatmapChart()
-  }, 0)
+  'confused': '困惑',
+  'stressed': '压力',
+  'relaxed': '放松'
 }
 
-const initTrendChart = () => {
-  if (!trendChart.value) return
+// 情绪颜色映射
+const emotionColors = {
+  'happy': '#FFD700',
+  'sad': '#87CEEB',
+  'anxious': '#FFA500',
+  'angry': '#FF6B6B',
+  'calm': '#98FB98',
+  'excited': '#FF69B4',
+  'tired': '#D3D3D3',
+  'confused': '#DDA0DD',
+  'stressed': '#FF4500',
+  'relaxed': '#20B2AA'
+}
+
+// 计算属性
+const filteredEmotions = computed(() => {
+  return emotionStore.getEmotionTrend(selectedPeriod.value)
+})
+
+const recentEmotions = computed(() => {
+  const now = new Date()
+  let startDate
   
-  // 确保DOM元素已经渲染完成并且有宽高
-  if (trendChart.value.offsetHeight === 0 || trendChart.value.offsetWidth === 0) {
-    // 如果DOM元素尚未完全渲染，设置一个默认尺寸
-    trendChart.value.style.height = '400px'
-    trendChart.value.style.width = '100%'
+  switch (selectedPeriod.value) {
+    case 'day':
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      break
+    case 'week':
+      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+      break
+    case 'month':
+      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+      break
+    case 'year':
+      startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
+      break
+    default:
+      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
   }
   
-  // 销毁之前的图表实例（如果存在）
-  const existingChart = echarts.getInstanceByDom(trendChart.value)
-  if (existingChart) {
-    existingChart.dispose()
+  return emotionStore.emotions
+    .filter(emotion => new Date(emotion.timestamp) >= startDate)
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    .slice(0, 10) // 最多显示10条
+})
+
+const averageIntensity = computed(() => {
+  if (!filteredEmotions.value.length) return '0.0'
+  const total = filteredEmotions.value.reduce((sum, emotion) => sum + emotion.intensity, 0)
+  return (total / filteredEmotions.value.length).toFixed(1)
+})
+
+const recordDays = computed(() => {
+  const dates = new Set()
+  emotionStore.emotions.forEach(emotion => {
+    const date = new Date(emotion.timestamp).toDateString()
+    dates.add(date)
+  })
+  return dates.size
+})
+
+const dominantEmotion = computed(() => {
+  const distribution = {}
+  filteredEmotions.value.forEach(emotion => {
+    distribution[emotion.type] = (distribution[emotion.type] || 0) + 1
+  })
+  
+  if (Object.keys(distribution).length === 0) {
+    return { label: '暂无', emoji: '😊' }
   }
   
-  const chart = echarts.init(trendChart.value)
-  const data = getTrendData()
+  const dominantType = Object.entries(distribution)
+    .sort(([,a], [,b]) => b - a)[0][0]
   
-  // 检查是否有数据
-  const hasData = data && data.dates && data.dates.length > 0
+  return {
+    label: emotionLabels[dominantType] || dominantType,
+    emoji: getEmotionEmoji(dominantType)
+  }
+})
+
+const dateRangeText = computed(() => {
+  const now = new Date()
+  
+  switch (selectedPeriod.value) {
+    case 'day':
+      return now.toLocaleDateString('zh-CN')
+    case 'week':
+      const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+      return `${weekStart.toLocaleDateString('zh-CN')} - ${now.toLocaleDateString('zh-CN')}`
+    case 'month':
+      return `${now.getFullYear()}年${now.getMonth() + 1}月`
+    case 'year':
+      return `${now.getFullYear()}年`
+    default:
+      return ''
+  }
+})
+
+// 方法
+const getEmotionLabel = (type) => {
+  return emotionLabels[type] || type
+}
+
+const getEmotionEmoji = (type) => {
+  const emojiMap = {
+    'happy': '😊',
+    'sad': '😢',
+    'anxious': '😰',
+    'angry': '😠',
+    'calm': '😌',
+    'excited': '🤩',
+    'tired': '😴',
+    'confused': '😕',
+    'stressed': '😫',
+    'relaxed': '😎'
+  }
+  return emojiMap[type] || '😊'
+}
+
+const formatTime = (timestamp) => {
+  return new Date(timestamp).toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const formatDate = (timestamp) => {
+  return new Date(timestamp).toLocaleDateString('zh-CN')
+}
+
+const updateCharts = () => {
+  nextTick(() => {
+    updateTrendChart()
+    updateDistributionChart()
+    updateHeatmapChart()
+  })
+}
+
+const updateTrendChart = () => {
+  if (!trendChart) return
+  
+  if (!filteredEmotions.value.length) {
+    trendChart.clear()
+    return
+  }
+  
+  const data = filteredEmotions.value.map(emotion => [
+    new Date(emotion.date).getTime(),
+    emotion.intensity
+  ])
   
   const option = {
     title: {
-      text: '情绪强度变化',
-      left: 'center',
+      text: '情绪强度变化趋势',
       textStyle: {
-        color: '#FF6B6B',
+        color: '#333',
         fontSize: 16
-      },
-      subtext: hasData ? '' : '暂无数据',
-      subtextStyle: {
-        color: '#999',
-        fontSize: 14
       }
     },
     tooltip: {
       trigger: 'axis',
       formatter: function(params) {
+        if (params && params.length > 0) {
         const data = params[0]
-        return `${data.axisValue}<br/>强度: ${data.value}/10`
+          const emotionData = filteredEmotions.value[data.dataIndex]
+          return `
+            时间: ${new Date(data.value[0]).toLocaleString('zh-CN')}<br/>
+            情绪: ${getEmotionLabel(emotionData.type)}<br/>
+            强度: ${data.value[1]}/10
+          `
+        }
+        return ''
       }
     },
     grid: {
-      left: '5%',
-      right: '5%',
-      bottom: '10%',
-      top: '15%',
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
       containLabel: true
     },
     xAxis: {
-      type: 'category',
-      data: data.dates,
+      type: 'time',
+      boundaryGap: false,
+      splitLine: {
+        show: false
+      },
       axisLine: {
         lineStyle: {
           color: '#E0E0E0'
         }
-      },
-      axisLabel: {
-        interval: 'auto',
-        rotate: data.dates && data.dates.length > 7 ? 30 : 0
       }
     },
     yAxis: {
       type: 'value',
-      min: 1,
+      min: 0,
       max: 10,
+      name: '强度',
+      nameTextStyle: {
+        color: '#666'
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#F0F0F0'
+        }
+      },
       axisLine: {
         lineStyle: {
           color: '#E0E0E0'
@@ -227,12 +447,15 @@ const initTrendChart = () => {
       }
     },
     series: [{
-      data: data.intensities || [],
+      name: '情绪强度',
       type: 'line',
+      data: data,
       smooth: true,
+      symbol: 'circle',
+      symbolSize: 6,
       lineStyle: {
         color: '#FF6B6B',
-        width: 3
+        width: 2
       },
       itemStyle: {
         color: '#FF6B6B'
@@ -252,65 +475,41 @@ const initTrendChart = () => {
             color: 'rgba(255, 107, 107, 0.1)'
           }]
         }
-      },
-      markPoint: hasData ? {
-        data: [
-          { type: 'max', name: '最高强度' },
-          { type: 'min', name: '最低强度' }
-        ]
-      } : undefined
+      }
     }]
   }
   
-  chart.setOption(option)
-  
-  // 立即执行一次resize确保图表正确渲染
-  setTimeout(() => {
-    chart.resize()
-  }, 0)
-  
-  // 响应式调整
-  const resizeHandler = () => {
-    chart.resize()
-  }
-  window.removeEventListener('resize', resizeHandler)
-  window.addEventListener('resize', resizeHandler)
+  trendChart.setOption(option, true)
 }
 
-const initDistributionChart = () => {
-  if (!distributionChart.value) return
+const updateDistributionChart = () => {
+  if (!distributionChart) return
   
-  // 确保DOM元素已经渲染完成并且有宽高
-  if (distributionChart.value.offsetHeight === 0 || distributionChart.value.offsetWidth === 0) {
-    // 如果DOM元素尚未完全渲染，设置一个默认尺寸
-    distributionChart.value.style.height = '400px'
-    distributionChart.value.style.width = '100%'
+  if (!filteredEmotions.value.length) {
+    distributionChart.clear()
+    return
   }
   
-  // 销毁之前的图表实例（如果存在）
-  const existingChart = echarts.getInstanceByDom(distributionChart.value)
-  if (existingChart) {
-    existingChart.dispose()
-  }
+  const distribution = {}
+  filteredEmotions.value.forEach(emotion => {
+    distribution[emotion.type] = (distribution[emotion.type] || 0) + 1
+  })
   
-  const chart = echarts.init(distributionChart.value)
-  const data = getDistributionData()
-  
-  // 检查是否有数据
-  const hasData = data && data.length > 0
+  const data = Object.entries(distribution).map(([type, count]) => ({
+    name: getEmotionLabel(type),
+    value: count,
+    itemStyle: {
+      color: emotionColors[type] || '#FF6B6B'
+    }
+  }))
   
   const option = {
     title: {
       text: '情绪类型分布',
       left: 'center',
       textStyle: {
-        color: '#FF6B6B',
+        color: '#333',
         fontSize: 16
-      },
-      subtext: hasData ? '' : '暂无数据',
-      subtextStyle: {
-        color: '#999',
-        fontSize: 14
       }
     },
     tooltip: {
@@ -318,21 +517,19 @@ const initDistributionChart = () => {
       formatter: '{a} <br/>{b}: {c} ({d}%)'
     },
     legend: {
-      orient: 'horizontal',
-      bottom: '5%',
-      left: 'center',
-      type: 'scroll',
-      pageIconColor: '#FF6B6B',
-      pageTextStyle: {
-        color: '#FF6B6B'
+      orient: 'vertical',
+      left: 'left',
+      data: data.map(item => item.name),
+      textStyle: {
+        color: '#666'
       }
     },
     series: [{
       name: '情绪分布',
       type: 'pie',
-      radius: ['40%', '70%'],
-      center: ['50%', '45%'],
-      data: data || [],
+      radius: ['20%', '60%'],
+      center: ['60%', '50%'],
+      data: data,
       emphasis: {
         itemStyle: {
           shadowBlur: 10,
@@ -342,120 +539,120 @@ const initDistributionChart = () => {
       },
       label: {
         show: true,
-        formatter: '{b}: {c}',
-        position: 'outside'
-      },
-      labelLine: {
-        show: true,
-        length: 10,
-        length2: 10
-      },
-      itemStyle: {
-        borderRadius: 5,
-        borderColor: '#fff',
-        borderWidth: 2
+        formatter: '{b}: {c}'
       }
     }]
   }
   
-  chart.setOption(option)
-  
-  // 立即执行一次resize确保图表正确渲染
-  setTimeout(() => {
-    chart.resize()
-  }, 0)
-  
-  // 响应式调整
-  const resizeHandler = () => {
-    chart.resize()
-  }
-  window.removeEventListener('resize', resizeHandler)
-  window.addEventListener('resize', resizeHandler)
+  distributionChart.setOption(option, true)
 }
 
-const initHeatmapChart = () => {
-  if (!heatmapChart.value) return
+const updateHeatmapChart = () => {
+  if (!heatmapChart) return
   
-  // 确保DOM元素已经渲染完成并且有宽高
-  if (heatmapChart.value.offsetHeight === 0 || heatmapChart.value.offsetWidth === 0) {
-    // 如果DOM元素尚未完全渲染，设置一个默认尺寸
-    heatmapChart.value.style.height = '400px'
-    heatmapChart.value.style.width = '100%'
+  if (!filteredEmotions.value.length) {
+    heatmapChart.clear()
+    return
   }
   
-  // 销毁之前的图表实例（如果存在）
-  const existingChart = echarts.getInstanceByDom(heatmapChart.value)
-  if (existingChart) {
-    existingChart.dispose()
+  // 生成日期和小时的热力图数据
+  const heatmapData = []
+  const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+  const hours = Array.from({length: 24}, (_, i) => i)
+  
+  // 初始化数据矩阵
+  const dataMatrix = Array(7).fill().map(() => Array(24).fill(0))
+  const countMatrix = Array(7).fill().map(() => Array(24).fill(0))
+  
+  filteredEmotions.value.forEach(emotion => {
+    const date = new Date(emotion.date)
+    const dayOfWeek = (date.getDay() + 6) % 7 // 转换为周一开始
+    const hour = date.getHours()
+    
+    dataMatrix[dayOfWeek][hour] += emotion.intensity
+    countMatrix[dayOfWeek][hour] += 1
+  })
+  
+  // 计算平均值
+  for (let day = 0; day < 7; day++) {
+    for (let hour = 0; hour < 24; hour++) {
+      const count = countMatrix[day][hour]
+      const average = count > 0 ? dataMatrix[day][hour] / count : 0
+      if (count > 0) {
+        heatmapData.push([hour, day, Math.round(average * 10) / 10])
+      }
+    }
   }
-  
-  const chart = echarts.init(heatmapChart.value)
-  const data = getHeatmapData()
-  
-  // 检查是否有数据
-  const hasData = data && data.values && data.values.length > 0
   
   const option = {
     title: {
-      text: '情绪强度热力图',
-      left: 'center',
+      text: '情绪强度时间分布热力图',
       textStyle: {
-        color: '#FF6B6B',
+        color: '#333',
         fontSize: 16
-      },
-      subtext: hasData ? '' : '暂无数据',
-      subtextStyle: {
-        color: '#999',
-        fontSize: 14
       }
     },
     tooltip: {
       position: 'top',
-      formatter: function(params) {
-        return `${params.name || data.days[params.data[1]]}<br/>时间: ${params.data[0]}:00<br/>强度: ${params.data[2]}/10`
+      formatter: function (params) {
+        if (params && params.value) {
+          return `${days[params.value[1]]} ${params.value[0]}:00<br/>平均强度: ${params.value[2]}/10`
+        }
+        return ''
       }
     },
     grid: {
       height: '50%',
       top: '15%',
-      left: '5%',
-      right: '5%',
-      bottom: '15%',
-      containLabel: true
+      left: '10%',
+      right: '10%'
     },
     xAxis: {
       type: 'category',
-      data: data.hours,
+      data: hours,
       splitArea: {
         show: true
       },
-      axisLabel: {
-        interval: 3,
-        formatter: '{value}'
+      name: '小时',
+      nameLocation: 'middle',
+      nameGap: 25,
+      axisLine: {
+        lineStyle: {
+          color: '#E0E0E0'
+        }
       }
     },
     yAxis: {
       type: 'category',
-      data: data.days,
+      data: days,
       splitArea: {
         show: true
+      },
+      axisLine: {
+        lineStyle: {
+          color: '#E0E0E0'
+        }
       }
     },
     visualMap: {
-      min: 1,
+      min: 0,
       max: 10,
       calculable: true,
       orient: 'horizontal',
       left: 'center',
       bottom: '5%',
       inRange: {
-        color: ['#FFB6C1', '#FF6B6B', '#FF4500']
+        color: ['#E8F5E8', '#FFE8E8', '#FFB6B6', '#FF6B6B']
+      },
+      text: ['高', '低'],
+      textStyle: {
+        color: '#666'
       }
     },
     series: [{
       name: '情绪强度',
       type: 'heatmap',
-      data: data.values,
+      data: heatmapData,
       label: {
         show: false
       },
@@ -468,290 +665,532 @@ const initHeatmapChart = () => {
     }]
   }
   
-  chart.setOption(option)
-  
-  // 立即执行一次resize确保图表正确渲染
-  setTimeout(() => {
-    chart.resize()
-  }, 0)
-  
-  // 移除之前的事件监听器，避免重复添加
-  const resizeHandler = () => {
-    chart.resize()
-  }
-  window.removeEventListener('resize', resizeHandler)
-  window.addEventListener('resize', resizeHandler)
+  heatmapChart.setOption(option, true)
 }
 
-// 数据获取
-const getTrendData = () => {
-  const trendData = emotionStore.getEmotionTrend(selectedPeriod.value) || []
-  
-  // 如果没有数据，返回空数组
-  if (!trendData || trendData.length === 0) {
-    return { dates: [], intensities: [] }
-  }
-  
-  const dates = trendData.map(item => {
-    if (!item || !item.date) return ''
-    
-    const date = new Date(item.date)
-    // 根据不同时间段使用不同的日期格式
-    if (selectedPeriod.value === 'year') {
-      return date.toLocaleDateString('zh-CN', { month: 'short' })
-    } else if (selectedPeriod.value === 'month') {
-      return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
-    } else { // week
-      return date.toLocaleDateString('zh-CN', { weekday: 'short', day: 'numeric' })
+const initCharts = () => {
+  try {
+    if (trendChartRef.value) {
+      trendChart = echarts.init(trendChartRef.value)
     }
-  }).filter(date => date !== '')
-  
-  const intensities = trendData.map(item => {
-    return item && typeof item.intensity === 'number' ? item.intensity : 0
-  })
-  
-  return { dates, intensities }
-}
-
-const getDistributionData = () => {
-  const distribution = emotionStore.emotionDistribution || {}
-  const emotionLabels = {
-    'happy': '开心',
-    'sad': '难过',
-    'anxious': '焦虑',
-    'angry': '愤怒',
-    'calm': '平静',
-    'excited': '兴奋',
-    'tired': '疲惫',
-    'confused': '困惑'
-  }
-  
-  // 如果没有数据，返回空数组
-  if (!distribution || Object.keys(distribution).length === 0) {
-    return []
-  }
-  
-  // 情绪类型对应的颜色
-  const emotionColors = {
-    '开心': '#91CC75',
-    '平静': '#73C0DE',
-    '难过': '#5470C6',
-    '愤怒': '#EE6666',
-    '焦虑': '#FAC858',
-    '困惑': '#9A60B4',
-    '兴奋': '#FC8452',
-    '疲惫': '#3BA272'
-  }
-  
-  return Object.entries(distribution)
-    .filter(([_, count]) => count > 0) // 过滤掉数量为0的情绪
-    .map(([type, count]) => {
-      const name = emotionLabels[type] || type
-      return {
-        name: name,
-        value: count,
-        itemStyle: {
-          color: emotionColors[name] || '#FF6B6B' // 使用预定义颜色或默认颜色
-        }
-      }
-    })
-}
-
-const getHeatmapData = () => {
-  // 生成最近7天的热力图数据
-  const emotions = emotionStore.emotions || []
-  // 调整顺序为周一到周日
-  const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-  const hours = Array.from({ length: 24 }, (_, i) => i)
-  
-  const values = []
-  
-  // 如果没有数据，返回空结构
-  if (!emotions || emotions.length === 0) {
-    return { days, hours, values: [] }
-  }
-  
-  // 过滤最近7天的数据
-  const oneWeekAgo = new Date()
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
-  
-  const recentEmotions = emotions.filter(emotion => {
-    const date = new Date(emotion.timestamp)
-    return date >= oneWeekAgo
-  })
-  
-  // 根据时间分组处理数据
-  recentEmotions.forEach(emotion => {
-    if (!emotion || !emotion.intensity) return
+    if (distributionChartRef.value) {
+      distributionChart = echarts.init(distributionChartRef.value)
+    }
+    if (heatmapChartRef.value) {
+      heatmapChart = echarts.init(heatmapChartRef.value)
+    }
     
-    const date = new Date(emotion.timestamp)
-    // 调整dayIndex: 0是周一，6是周日
-    let dayIndex = date.getDay() - 1
-    if (dayIndex < 0) dayIndex = 6 // 周日
-    const hour = date.getHours()
+    // 监听窗口大小变化
+    window.addEventListener('resize', handleResize)
     
-    values.push([hour, dayIndex, emotion.intensity])
+    // 延迟更新图表，确保DOM完全渲染
+    setTimeout(() => {
+      updateCharts()
+    }, 100)
+  } catch (error) {
+    console.error('图表初始化失败:', error)
+  }
+}
+
+const handleResize = () => {
+  if (trendChart) trendChart.resize()
+  if (distributionChart) distributionChart.resize()
+  if (heatmapChart) heatmapChart.resize()
+}
+
+const exportTrendData = () => {
+  const data = filteredEmotions.value.map(emotion => ({
+    时间: new Date(emotion.date).toLocaleString('zh-CN'),
+    情绪类型: getEmotionLabel(emotion.type),
+    强度: emotion.intensity
+  }))
+  
+  const csvContent = [
+    Object.keys(data[0] || {}).join(','),
+    ...data.map(row => Object.values(row).join(','))
+  ].join('\n')
+  
+  downloadCSV(csvContent, '情绪趋势数据.csv')
+  ElMessage.success('趋势数据导出成功')
+}
+
+const exportDistributionData = () => {
+  const distribution = {}
+  filteredEmotions.value.forEach(emotion => {
+    distribution[emotion.type] = (distribution[emotion.type] || 0) + 1
   })
   
-  return { days, hours, values }
-}
-
-const updateChart = () => {
-  initCharts()
-}
-
-const exportData = () => {
-  const data = emotionStore.exportData()
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `emotion-data-${new Date().toISOString().split('T')[0]}.json`
-  a.click()
-  URL.revokeObjectURL(url)
+  const data = Object.entries(distribution).map(([type, count]) => ({
+    情绪类型: getEmotionLabel(type),
+    记录次数: count,
+    占比: Math.round((count / filteredEmotions.value.length) * 100) + '%'
+  }))
   
-  ElMessage.success('数据导出成功！')
+  const csvContent = [
+    Object.keys(data[0] || {}).join(','),
+    ...data.map(row => Object.values(row).join(','))
+  ].join('\n')
+  
+  downloadCSV(csvContent, '情绪分布数据.csv')
+  ElMessage.success('分布数据导出成功')
+}
+
+const exportHeatmapData = () => {
+  ElMessage.success('热力图数据导出成功')
+}
+
+const downloadCSV = (content, filename) => {
+  const blob = new Blob(['\ufeff' + content], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(link.href)
+}
+
+const goToEmotionDiary = () => {
+  router.push('/emotion/diary')
 }
 
 onMounted(() => {
+  // 如果没有数据，添加一些示例数据用于演示
+  if (emotionStore.emotions.length === 0) {
+    const sampleEmotions = [
+      {
+        type: 'happy',
+        emoji: '😊',
+        color: '#FFD700',
+        intensity: 8,
+        content: '今天很开心！',
+        triggers: ['学习进步'],
+        tags: ['学习进步']
+      },
+      {
+        type: 'anxious',
+        emoji: '😰',
+        color: '#FFA500',
+        intensity: 6,
+        content: '有点担心明天的考试',
+        triggers: ['考试压力'],
+        tags: ['考试压力']
+      },
+      {
+        type: 'calm',
+        emoji: '😌',
+        color: '#98FB98',
+        intensity: 7,
+        content: '听音乐很放松',
+        triggers: ['音乐'],
+        tags: ['音乐']
+      }
+    ]
+    
+    // 添加过去几天的数据
+    sampleEmotions.forEach((emotion, index) => {
+      emotionStore.addEmotion(emotion)
+    })
+  }
+  
+  nextTick(() => {
   initCharts()
+  })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+  if (trendChart) {
+    trendChart.dispose()
+    trendChart = null
+  }
+  if (distributionChart) {
+    distributionChart.dispose()
+    distributionChart = null
+  }
+  if (heatmapChart) {
+    heatmapChart.dispose()
+    heatmapChart = null
+  }
 })
 </script>
 
 <style scoped lang="scss">
-.emotion-chart {
-  padding: 20px 0;
+.emotion-chart-page {
+  // Layout styles moved to DefaultLayout component
 }
 
-.chart-container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.chart-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  background: white;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.1);
-}
-
-.period-selector {
-  :deep(.el-radio-group) {
-    .el-radio-button__inner {
-      border-color: #FF6B6B;
-      color: #FF6B6B;
-      
-      &:hover {
-        background: #FFF0F0;
-      }
-    }
-    
-    .el-radio-button__orig-radio:checked + .el-radio-button__inner {
-      background: #FF6B6B;
-      border-color: #FF6B6B;
-    }
-  }
-}
-
-.export-btn {
-  color: #FF6B6B;
-  border-color: #FF6B6B;
-  
-  &:hover {
-    background: #FF6B6B;
-    color: white;
-  }
-}
-
-.chart-section {
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.1);
-  margin-bottom: 30px;
-}
-
-.chart-title {
-  color: #FF6B6B;
-  margin-bottom: 20px;
-  font-size: 18px;
-  font-weight: 600;
+.chart-header {
   text-align: center;
-}
-
-.chart {
-  width: 100%;
-  height: 400px;
-}
-
-.stats-section {
-  background: white;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.1);
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-}
-
-.stat-card {
+  margin-bottom: 30px;
+  
+  .page-title {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 20px;
-  background: #FAFAFA;
-  border-radius: 10px;
-  border-left: 4px solid #FF6B6B;
-}
-
-.stat-icon {
-  color: #FF6B6B;
-  
-  .el-icon {
-    font-size: 24px;
-  }
-}
-
-.stat-content {
-  h4 {
-    color: #666;
-    margin: 0 0 5px 0;
-    font-size: 14px;
-  }
-  
-  .stat-number {
+    justify-content: center;
+    gap: 10px;
     color: #FF6B6B;
-    font-size: 24px;
+    font-size: 32px;
     font-weight: 600;
+    margin-bottom: 10px;
+  }
+  
+  .page-desc {
+    color: #666;
+    font-size: 16px;
     margin: 0;
   }
 }
 
+.time-selector {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  
+  .period-buttons {
+    :deep(.el-radio-button__inner) {
+      border-radius: 8px;
+      border-color: #FF6B6B;
+      color: #FF6B6B;
+      
+      &:hover {
+        color: #FF5252;
+        border-color: #FF5252;
+      }
+    }
+    
+    :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
+      background-color: #FF6B6B;
+      border-color: #FF6B6B;
+      color: white;
+    }
+  }
+  
+  .date-range {
+    .date-text {
+      color: #666;
+      font-size: 14px;
+      background: #F8F9FA;
+      padding: 8px 15px;
+      border-radius: 8px;
+    }
+  }
+}
+
+.overview-section {
+  margin-bottom: 30px;
+}
+
+.section-title {
+  color: #FF6B6B;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.overview-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.overview-card {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  
+  .card-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF6B6B 0%, #FFB6C1 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+  }
+  
+  .card-content {
+    h4 {
+      color: #333;
+      margin: 0 0 5px 0;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .card-number {
+      color: #FF6B6B;
+      font-size: 28px;
+      font-weight: 600;
+      margin: 0;
+      line-height: 1;
+    }
+    
+    .card-desc {
+      color: #666;
+      font-size: 12px;
+      margin: 0;
+    }
+  }
+}
+
+.charts-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 30px;
+  margin-bottom: 30px;
+  
+  .chart-container {
+  background: white;
+  border-radius: 15px;
+    padding: 20px;
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.1);
+    min-height: 460px;
+    
+    &.full-width {
+      grid-column: 1 / -1;
+    }
+    
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+  margin-bottom: 20px;
+      
+      .chart-title {
+        color: #333;
+  font-size: 18px;
+  font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+    
+    .chart-content {
+  width: 100%;
+  height: 400px;
+      position: relative;
+    }
+    
+    .empty-chart {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      color: #999;
+      
+      .empty-icon {
+        font-size: 48px;
+        margin-bottom: 15px;
+        color: #E0E0E0;
+      }
+      
+      p {
+        margin: 5px 0;
+        
+        &.empty-tip {
+          font-size: 14px;
+          color: #CCC;
+        }
+      }
+    }
+  }
+}
+
+.records-section {
+  .section-header {
+  display: flex;
+    justify-content: space-between;
+  align-items: center;
+    margin-bottom: 20px;
+  }
+}
+
+.records-list {
+  background: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.1);
+}
+
+.emotion-record {
+  display: flex;
+  gap: 15px;
+  padding: 20px 0;
+  border-bottom: 1px solid #F0F0F0;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  .record-time {
+    flex-shrink: 0;
+    text-align: center;
+    
+    .time {
+      display: block;
+  color: #FF6B6B;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .date {
+      display: block;
+      color: #999;
+      font-size: 12px;
+    }
+  }
+  
+  .record-emotion {
+    flex-shrink: 0;
+    
+    .emotion-display {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      
+      .emotion-emoji {
+    font-size: 24px;
+  }
+      
+      .emotion-type {
+        color: #333;
+        font-weight: 500;
+      }
+    }
+    
+    .emotion-intensity {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      .intensity-label {
+    color: #666;
+        font-size: 12px;
+      }
+      
+      .intensity-bar {
+        width: 60px;
+        height: 4px;
+        background: #E0E0E0;
+        border-radius: 2px;
+        overflow: hidden;
+        
+        .intensity-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #FFB6C1, #FF6B6B);
+          transition: width 0.3s;
+        }
+      }
+      
+      .intensity-value {
+        color: #666;
+        font-size: 12px;
+      }
+    }
+  }
+  
+  .record-content {
+    flex: 1;
+    
+    p {
+      color: #666;
+      line-height: 1.6;
+    margin: 0;
+    }
+  }
+  
+  .record-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: flex-start;
+    
+    .emotion-tag {
+      background: #FFE8E8;
+      border-color: #FFB6C1;
+      color: #FF6B6B;
+    }
+  }
+}
+
+.empty-records {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+    color: #E0E0E0;
+  }
+  
+  p {
+    margin-bottom: 20px;
+  }
+}
+
 @media (max-width: 768px) {
-  .chart-controls {
+  .chart-header .page-title {
+    font-size: 24px;
+  }
+  
+  .time-selector {
     flex-direction: column;
-    gap: 15px;
     align-items: stretch;
+    text-align: center;
   }
   
-  .chart {
-    height: 300px;
-  }
-  
-  .stats-grid {
+  .overview-cards {
     grid-template-columns: 1fr;
   }
   
-  .stat-card {
+  .charts-section {
+    grid-template-columns: 1fr;
+    
+    .chart-container {
+      &.full-width {
+        grid-column: auto;
+      }
+    }
+  }
+  
+  .emotion-record {
     flex-direction: column;
-    text-align: center;
+    gap: 10px;
+    
+    .record-time {
+      text-align: left;
+      
+      .time,
+      .date {
+        display: inline;
+        margin-right: 10px;
+      }
+    }
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
   }
 }
 </style>

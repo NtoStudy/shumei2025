@@ -491,7 +491,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import {
   Warning,
   Phone,
@@ -667,15 +667,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.crisis-page {
-  padding: 2rem 0;
-}
-
-.crisis-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
+// 作为子路由，不需要额外的页面级padding和容器样式
 
 .section-header {
   display: flex;
