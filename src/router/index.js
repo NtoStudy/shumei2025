@@ -67,6 +67,11 @@ const routes = [
             path: 'chart',
             name: 'EmotionChart',
             component: () => import('@/views/emotion/EmotionChart.vue')
+          },
+          {
+            path: 'insights',
+            name: 'AIInsights',
+            component: () => import('@/views/emotion/AIInsights.vue')
           }
         ]
       },

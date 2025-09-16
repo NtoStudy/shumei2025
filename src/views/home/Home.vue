@@ -1,5 +1,48 @@
 <template>
   <div class="home-page">
+        <!-- AI情绪分析（精简版） -->
+        <div class="ai-analysis-section">
+          <div class="quick-analysis">
+            <h3>
+              <el-icon><MagicStick /></el-icon>
+              AI情绪分析
+            </h3>
+            <div class="quick-input">
+              <el-input
+                v-model="quickAnalysisText"
+                type="textarea"
+                :rows="2"
+                placeholder="简单描述一下现在的感受..."
+                @input="onQuickAnalysisInput"
+                maxlength="200"
+              />
+              <div class="quick-actions">
+                <el-button 
+                  @click="quickAnalyze" 
+                  type="primary" 
+                  size="small"
+                  :loading="isQuickAnalyzing"
+                  :disabled="!quickAnalysisText.trim()"
+                >
+                  分析
+                </el-button>
+                <el-button @click="goToFullAnalysis" size="small">完整分析</el-button>
+              </div>
+            </div>
+            <div class="quick-result" v-if="quickResult">
+              <div class="result-emotion">
+                <span class="emotion-emoji">{{ getEmotionEmoji(quickResult.dominant) }}</span>
+                <span class="emotion-name">{{ getEmotionLabel(quickResult.dominant) }}</span>
+                <span class="emotion-confidence">{{ (quickResult.confidence * 100).toFixed(0) }}%</span>
+              </div>
+              <div class="result-actions">
+                <el-button @click="saveQuickResult" size="small" type="text">保存</el-button>
+                <el-button @click="clearQuickResult" size="small" type="text">清除</el-button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- 欢迎区域 -->
         <div class="welcome-section">
           <div class="welcome-card">
@@ -157,11 +200,18 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useEmotionStore } from '@/stores/emotion'
 import { useCommunityStore } from '@/stores/community'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const userStore = useUserStore()
 const emotionStore = useEmotionStore()
 const communityStore = useCommunityStore()
+
+// AI分析相关数据
+const quickAnalysisText = ref('')
+const quickResult = ref(null)
+const isQuickAnalyzing = ref(false)
+const debounceTimer = ref(null)
 
 const recommendations = ref([
   {
@@ -252,14 +302,208 @@ const viewRecommendation = (item) => {
   }
 }
 
-onMounted(() => {
+// AI分析相关方法
+const onQuickAnalysisInput = () => {
+  if (debounceTimer.value) {
+    clearTimeout(debounceTimer.value)
+  }
+  
+  debounceTimer.value = setTimeout(() => {
+    if (quickAnalysisText.value.trim().length > 5) {
+      quickAnalyze()
+    }
+  }, 1500)
+}
+
+const quickAnalyze = async () => {
+  if (!quickAnalysisText.value.trim()) return
+
+  isQuickAnalyzing.value = true
+  try {
+    const result = await emotionStore.analyzeEmotionText(quickAnalysisText.value)
+    if (result) {
+      quickResult.value = result
+    }
+  } catch (error) {
+    console.error('快速分析失败:', error)
+    ElMessage.error('分析失败，请重试')
+  } finally {
+    isQuickAnalyzing.value = false
+  }
+}
+
+const saveQuickResult = async () => {
+  if (!quickResult.value) return
+
+  try {
+    const emotionData = {
+      type: quickResult.value.dominant,
+      intensity: Math.round(quickResult.value.intensity * 10),
+      emoji: getEmotionEmoji(quickResult.value.dominant),
+      color: getEmotionColor(quickResult.value.dominant),
+      content: quickAnalysisText.value,
+      tags: ['快速分析']
+    }
+
+    await emotionStore.addEmotion(emotionData)
+    ElMessage.success('情绪记录已保存')
+    
+    // 清空
+    clearQuickResult()
+  } catch (error) {
+    console.error('保存失败:', error)
+    ElMessage.error('保存失败，请重试')
+  }
+}
+
+const clearQuickResult = () => {
+  quickAnalysisText.value = ''
+  quickResult.value = null
+}
+
+const goToFullAnalysis = () => {
+  router.push('/emotion')
+}
+
+const getEmotionEmoji = (emotion) => {
+  const emojis = {
+    happy: '😊',
+    sad: '😢',
+    angry: '😠',
+    fear: '😰',
+    surprise: '😲',
+    disgust: '🤢',
+    neutral: '😐'
+  }
+  return emojis[emotion] || '😐'
+}
+
+const getEmotionColor = (emotion) => {
+  const colors = {
+    happy: '#FFD700',
+    sad: '#4169E1',
+    angry: '#FF6347',
+    fear: '#FF1493',
+    surprise: '#FF69B4',
+    disgust: '#9ACD32',
+    neutral: '#C0C0C0'
+  }
+  return colors[emotion] || '#C0C0C0'
+}
+
+onMounted(async () => {
   // 页面加载时的初始化逻辑
   emotionStore.updateStats()
+  
+  // 初始化AI引擎
+  try {
+    await emotionStore.initializeAI()
+  } catch (error) {
+    console.warn('AI初始化失败:', error)
+  }
 })
 </script>
 
 <style scoped lang="scss">
 // Layout styles moved to DefaultLayout component
+
+.ai-analysis-section {
+  margin-bottom: 24px;
+  
+  .quick-analysis {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 24px;
+    color: white;
+    
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 16px 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .quick-input {
+      .el-textarea {
+        margin-bottom: 12px;
+        
+        :deep(.el-textarea__inner) {
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          color: white;
+          border-radius: 12px;
+          
+          &::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+          }
+          
+          &:focus {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.15);
+          }
+        }
+      }
+      
+      .quick-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        
+        .el-button {
+          border-radius: 8px;
+        }
+      }
+    }
+    
+    .quick-result {
+      margin-top: 16px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      
+      .result-emotion {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        
+        .emotion-emoji {
+          font-size: 24px;
+        }
+        
+        .emotion-name {
+          font-size: 16px;
+          font-weight: 600;
+        }
+        
+        .emotion-confidence {
+          font-size: 14px;
+          opacity: 0.8;
+          background: rgba(255, 255, 255, 0.2);
+          padding: 2px 8px;
+          border-radius: 12px;
+        }
+      }
+      
+      .result-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        
+        .el-button {
+          color: rgba(255, 255, 255, 0.8);
+          
+          &:hover {
+            color: white;
+          }
+        }
+      }
+    }
+  }
+}
 
 .welcome-section {
   margin-bottom: 30px;

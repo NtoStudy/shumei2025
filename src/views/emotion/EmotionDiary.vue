@@ -8,6 +8,9 @@
       <p class="page-desc">记录此刻的心情，让情绪有迹可循</p>
     </div>
 
+    <!-- AI情绪分析 -->
+    <AIEmotionAnalyzer />
+
     <!-- 今日情绪快览 -->
     <div class="today-emotions" v-if="todayEmotions.length">
       <h3 class="section-title">
@@ -288,6 +291,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useEmotionStore } from '@/stores/emotion'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import AIEmotionAnalyzer from '@/components/emotion/AIEmotionAnalyzer.vue'
 
 const router = useRouter()
 const emotionStore = useEmotionStore()
