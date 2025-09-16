@@ -97,6 +97,16 @@
             快速操作
           </h3>
           <div class="actions-grid">
+            <div class="action-card universe-card" @click="goToUniverse">
+              <div class="action-icon universe-icon">
+                <el-icon><MagicStick /></el-icon>
+              </div>
+              <div class="action-info">
+                <h4>3D情绪宇宙</h4>
+                <p>在三维空间探索情绪世界</p>
+              </div>
+              <div class="action-badge">NEW</div>
+            </div>
             <div class="action-card" @click="goToBreathing">
               <div class="action-icon">
                 <el-icon><WindPower /></el-icon>
@@ -284,6 +294,11 @@ const goToTreehole = () => {
 
 const goToChart = () => {
   router.push('/emotion/chart')
+}
+
+const goToUniverse = () => {
+  router.push('/emotion/universe')
+  ElMessage.info('正在进入3D情绪宇宙...')
 }
 
 const viewRecommendation = (item) => {
@@ -665,6 +680,7 @@ onMounted(async () => {
   box-shadow: 0 4px 16px rgba(255, 107, 107, 0.1);
   cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;
+  position: relative;
   
   &:hover {
     transform: translateY(-5px);
@@ -680,6 +696,20 @@ onMounted(async () => {
     }
   }
   
+  .action-info {
+    h4 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    
+    p {
+      color: #666;
+      font-size: 14px;
+      margin: 0;
+    }
+  }
+  
   h4 {
     color: #333;
     margin-bottom: 10px;
@@ -690,6 +720,103 @@ onMounted(async () => {
     color: #666;
     font-size: 14px;
     margin: 0;
+  }
+  
+  .action-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+    animation: pulse-badge 2s infinite;
+  }
+  
+  &.universe-card {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+    color: white;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    
+    &:hover {
+      box-shadow: 0 8px 32px rgba(0, 212, 255, 0.3);
+      border-color: rgba(0, 212, 255, 0.5);
+    }
+    
+    .universe-icon {
+      color: #00d4ff;
+      position: relative;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60px;
+        height: 60px;
+        background: radial-gradient(circle, rgba(0, 212, 255, 0.2) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: universe-glow 3s ease-in-out infinite alternate;
+      }
+      
+      .el-icon {
+        position: relative;
+        z-index: 1;
+      }
+    }
+    
+    .action-info {
+      h4 {
+        color: #00d4ff;
+        font-weight: 600;
+      }
+      
+      p {
+        color: rgba(255, 255, 255, 0.8);
+      }
+    }
+    
+    .action-badge {
+      background: linear-gradient(135deg, #00d4ff, #0099cc);
+      animation: universe-pulse 2s infinite;
+    }
+  }
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes universe-glow {
+  0% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+@keyframes universe-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(0, 212, 255, 0.5);
   }
 }
 

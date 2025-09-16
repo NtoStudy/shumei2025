@@ -38,5 +38,20 @@ export default defineConfig({
     alias: {
       '@': '/src'
     }
+  },
+
+  // 开发服务器配置
+  server: {
+    proxy: {
+      // 代理 Kimi API 请求
+      '/api/kimi': {
+        target: 'https://api.moonshot.cn',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/kimi/, ''),
+        headers: {
+          'Origin': 'https://api.moonshot.cn'
+        }
+      }
+    }
   }
 })

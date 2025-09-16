@@ -37,7 +37,7 @@
 
     <!-- AI分析状态 -->
     <div class="ai-status" v-if="hasApiKey && !isAIReady">
-      <el-loading-icon />
+      <el-icon class="is-loading"><Loading /></el-icon>
       <span>AI情绪分析引擎启动中...</span>
     </div>
 
@@ -45,7 +45,7 @@
     <div class="analysis-input" v-if="hasApiKey && isAIReady">
       <div class="input-header">
         <h3>
-          <el-icon><Brain /></el-icon>
+          <el-icon><MagicStick /></el-icon>
           AI情绪分析
         </h3>
         <el-tag :type="analysisResult ? 'success' : 'info'" size="small">
@@ -163,7 +163,7 @@
       <!-- 建议区域 -->
       <div class="suggestions" v-if="suggestions">
         <h5>
-          <el-icon><Lightbulb /></el-icon>
+          <el-icon><Star /></el-icon>
           AI建议
         </h5>
         <el-tabs v-model="activeTab" class="suggestion-tabs">
@@ -260,6 +260,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useEmotionStore } from '@/stores/emotion'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Key, InfoFilled, Loading, MagicStick, Star } from '@element-plus/icons-vue'
 import emotionAI from '@/utils/emotionAI'
 
 const router = useRouter()

@@ -19,6 +19,9 @@
         <el-tab-pane label="AI洞察" name="insights">
           <AIInsights />
         </el-tab-pane>
+        <el-tab-pane label="3D情绪宇宙" name="universe">
+          <EmotionUniverse3D />
+        </el-tab-pane>
       </el-tabs>
     </div>
   </div>
@@ -30,6 +33,7 @@ import { useRouter } from 'vue-router'
 import EmotionDiary from './EmotionDiary.vue'
 import EmotionChart from './EmotionChart.vue'
 import AIInsights from './AIInsights.vue'
+import EmotionUniverse3D from '@/components/emotion/EmotionUniverse3D.vue'
 
 const router = useRouter()
 const activeTab = ref('diary')

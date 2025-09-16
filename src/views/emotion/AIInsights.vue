@@ -138,7 +138,7 @@
       <div class="insight-card suggestions-card" v-if="insights.hasData && insights.suggestions">
         <div class="card-header">
           <h3>
-            <el-icon><Lightbulb /></el-icon>
+            <el-icon><Star /></el-icon>
             个性化建议
           </h3>
         </div>
@@ -229,6 +229,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useEmotionStore } from '@/stores/emotion'
+import { Star } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const emotionStore = useEmotionStore()

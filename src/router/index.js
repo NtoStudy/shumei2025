@@ -72,6 +72,11 @@ const routes = [
             path: 'insights',
             name: 'AIInsights',
             component: () => import('@/views/emotion/AIInsights.vue')
+          },
+          {
+            path: 'universe',
+            name: 'EmotionUniverse',
+            component: () => import('@/views/emotion/EmotionUniverse.vue')
           }
         ]
       },

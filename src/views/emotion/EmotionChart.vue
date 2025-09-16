@@ -670,23 +670,48 @@ const updateHeatmapChart = () => {
 
 const initCharts = () => {
   try {
+    // 检查DOM元素是否有有效的尺寸
+    const checkAndInit = (ref, chartVar, chartName) => {
+      if (ref.value && ref.value.clientWidth > 0 && ref.value.clientHeight > 0) {
+        return echarts.init(ref.value)
+      } else {
+        console.warn(`${chartName} DOM元素尺寸为0，延迟初始化`)
+        return null
+      }
+    }
+    
+    // 初始化图表，如果DOM尺寸为0则延迟初始化
     if (trendChartRef.value) {
-      trendChart = echarts.init(trendChartRef.value)
+      trendChart = checkAndInit(trendChartRef, trendChart, 'TrendChart')
     }
     if (distributionChartRef.value) {
-      distributionChart = echarts.init(distributionChartRef.value)
+      distributionChart = checkAndInit(distributionChartRef, distributionChart, 'DistributionChart')
     }
     if (heatmapChartRef.value) {
-      heatmapChart = echarts.init(heatmapChartRef.value)
+      heatmapChart = checkAndInit(heatmapChartRef, heatmapChart, 'HeatmapChart')
     }
     
     // 监听窗口大小变化
     window.addEventListener('resize', handleResize)
     
-    // 延迟更新图表，确保DOM完全渲染
-    setTimeout(() => {
+    // 如果有图表初始化失败，延迟重试
+    const retryInit = () => {
+      if (!trendChart && trendChartRef.value?.clientWidth > 0) {
+        trendChart = echarts.init(trendChartRef.value)
+      }
+      if (!distributionChart && distributionChartRef.value?.clientWidth > 0) {
+        distributionChart = echarts.init(distributionChartRef.value)
+      }
+      if (!heatmapChart && heatmapChartRef.value?.clientWidth > 0) {
+        heatmapChart = echarts.init(heatmapChartRef.value)
+      }
+      
+      // 更新图表
       updateCharts()
-    }, 100)
+    }
+    
+    // 延迟更新图表，确保DOM完全渲染
+    setTimeout(retryInit, 200)
   } catch (error) {
     console.error('图表初始化失败:', error)
   }
@@ -791,8 +816,11 @@ onMounted(() => {
     })
   }
   
+  // 使用多重延迟确保DOM完全渲染
   nextTick(() => {
-  initCharts()
+    setTimeout(() => {
+      initCharts()
+    }, 100)
   })
 })
 

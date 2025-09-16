@@ -8,7 +8,8 @@ class EmotionAI {
     this.isInitialized = false
     // Kimi API配置
     this.apiKey = 'sk-TnLf9nqDgsFAuJ4fArErcFj7bqLkSH894RhWGLYGqiNMnnod'
-    this.baseURL = 'https://api.moonshot.cn/v1/chat/completions'
+    // 使用Vite代理路径避免CORS问题
+    this.baseURL = '/api/kimi/v1/chat/completions'
     this.model = 'moonshot-v1-8k'
     
     this.emotionLabels = [
@@ -334,6 +335,18 @@ class EmotionAI {
    * 获取错误结果
    */
   getErrorResult(error) {
+    // 根据错误类型提供更友好的提示
+    let reasoning = '分析暂时不可用'
+    if (error.message.includes('Failed to fetch')) {
+      reasoning = '网络连接问题，请检查网络后重试'
+    } else if (error.message.includes('401')) {
+      reasoning = 'API密钥验证失败，请检查配置'
+    } else if (error.message.includes('429')) {
+      reasoning = 'API调用频率过高，请稍后重试'
+    } else if (error.message.includes('500')) {
+      reasoning = 'AI服务暂时不可用，请稍后重试'
+    }
+    
     return {
       emotions: this.getDefaultEmotions(),
       dominant: 'neutral',
@@ -341,9 +354,11 @@ class EmotionAI {
       intensity: 0.3,
       analysis: {
         keywords: [],
-        reasoning: `分析失败: ${error.message}`,
+        reasoning: reasoning,
         textLength: 0,
-        source: 'error'
+        source: 'error',
+        error_type: error.name,
+        retry_suggested: true
       },
       timestamp: Date.now()
     }
