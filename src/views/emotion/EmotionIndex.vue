@@ -39,7 +39,14 @@ const router = useRouter()
 const activeTab = ref('diary')
 
 const handleTabClick = (tab) => {
-  // 可以在这里添加切换标签页的逻辑
+  // 当切换到图表标签页时，重新初始化图表
+  if (tab.props.name === 'chart') {
+    // 延迟执行，确保EmotionChart组件完全渲染
+    setTimeout(() => {
+      // 触发自定义事件，让子组件重新初始化图表
+      window.dispatchEvent(new CustomEvent('emotion-chart-tab-activated'))
+    }, 200)
+  }
 }
 </script>
 

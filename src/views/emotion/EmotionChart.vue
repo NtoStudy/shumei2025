@@ -367,9 +367,16 @@ const formatDate = (timestamp) => {
 
 const updateCharts = () => {
   nextTick(() => {
-    updateTrendChart()
-    updateDistributionChart()
-    updateHeatmapChart()
+    // 确保图表实例存在再更新
+    if (trendChart && trendChartRef.value) {
+      updateTrendChart()
+    }
+    if (distributionChart && distributionChartRef.value) {
+      updateDistributionChart()
+    }
+    if (heatmapChart && heatmapChartRef.value) {
+      updateHeatmapChart()
+    }
   })
 }
 
@@ -670,48 +677,48 @@ const updateHeatmapChart = () => {
 
 const initCharts = () => {
   try {
-    // 检查DOM元素是否有有效的尺寸
-    const checkAndInit = (ref, chartVar, chartName) => {
-      if (ref.value && ref.value.clientWidth > 0 && ref.value.clientHeight > 0) {
-        return echarts.init(ref.value)
-      } else {
-        console.warn(`${chartName} DOM元素尺寸为0，延迟初始化`)
-        return null
+    // 延迟初始化，确保DOM完全渲染
+    const tryInitChart = (ref, chartName) => {
+      if (ref.value) {
+        // 强制设置图表容器尺寸
+        ref.value.style.width = '100%'
+        ref.value.style.height = '400px'
+        
+        // 等待DOM完全渲染后再初始化
+        nextTick(() => {
+          try {
+            const chart = echarts.init(ref.value)
+            return chart
+          } catch (error) {
+            console.error(`${chartName} 初始化失败:`, error)
+            return null
+          }
+        })
       }
-    }
-    
-    // 初始化图表，如果DOM尺寸为0则延迟初始化
-    if (trendChartRef.value) {
-      trendChart = checkAndInit(trendChartRef, trendChart, 'TrendChart')
-    }
-    if (distributionChartRef.value) {
-      distributionChart = checkAndInit(distributionChartRef, distributionChart, 'DistributionChart')
-    }
-    if (heatmapChartRef.value) {
-      heatmapChart = checkAndInit(heatmapChartRef, heatmapChart, 'HeatmapChart')
+      return null
     }
     
     // 监听窗口大小变化
     window.addEventListener('resize', handleResize)
     
-    // 如果有图表初始化失败，延迟重试
-    const retryInit = () => {
-      if (!trendChart && trendChartRef.value?.clientWidth > 0) {
-        trendChart = echarts.init(trendChartRef.value)
-      }
-      if (!distributionChart && distributionChartRef.value?.clientWidth > 0) {
-        distributionChart = echarts.init(distributionChartRef.value)
-      }
-      if (!heatmapChart && heatmapChartRef.value?.clientWidth > 0) {
-        heatmapChart = echarts.init(heatmapChartRef.value)
-      }
-      
-      // 更新图表
-      updateCharts()
-    }
+    // 延迟初始化图表，确保DOM完全渲染
+    setTimeout(() => {
+      nextTick(() => {
+        if (trendChartRef.value) {
+          trendChart = echarts.init(trendChartRef.value)
+        }
+        if (distributionChartRef.value) {
+          distributionChart = echarts.init(distributionChartRef.value)
+        }
+        if (heatmapChartRef.value) {
+          heatmapChart = echarts.init(heatmapChartRef.value)
+        }
+        
+        // 初始化完成后更新图表
+        updateCharts()
+      })
+    }, 300)
     
-    // 延迟更新图表，确保DOM完全渲染
-    setTimeout(retryInit, 200)
   } catch (error) {
     console.error('图表初始化失败:', error)
   }
@@ -816,11 +823,38 @@ onMounted(() => {
     })
   }
   
-  // 使用多重延迟确保DOM完全渲染
-  nextTick(() => {
+  // 使用多重延迟确保DOM完全渲染，然后初始化图表
+  setTimeout(() => {
+    initCharts()
+  }, 500)
+  
+  // 监听标签页切换事件，重新初始化图表
+  const handleTabActivated = () => {
+    // 销毁现有图表实例
+    if (trendChart) {
+      trendChart.dispose()
+      trendChart = null
+    }
+    if (distributionChart) {
+      distributionChart.dispose()
+      distributionChart = null
+    }
+    if (heatmapChart) {
+      heatmapChart.dispose()
+      heatmapChart = null
+    }
+    
+    // 延迟重新初始化图表
     setTimeout(() => {
       initCharts()
-    }, 100)
+    }, 200)
+  }
+  
+  window.addEventListener('emotion-chart-tab-activated', handleTabActivated)
+  
+  // 清理函数
+  onUnmounted(() => {
+    window.removeEventListener('emotion-chart-tab-activated', handleTabActivated)
   })
 })
 
@@ -1010,8 +1044,8 @@ onUnmounted(() => {
     }
     
     .chart-content {
-  width: 100%;
-  height: 400px;
+      width: 100%;
+      height: 400px;
       position: relative;
     }
     

@@ -63,7 +63,6 @@ export class EmotionUniverse3D {
     this.selectedPlanet = null
     
     this.init().catch(error => {
-      console.error('❌ 3D宇宙初始化异常:', error)
       this.showFallbackMessage(error.message)
     })
   }
@@ -72,17 +71,10 @@ export class EmotionUniverse3D {
     if (this.isInitialized) return
     
     try {
-      console.log('🔍 开始详细检查容器状态...')
-      
-      // 详细检查容器状态
+      // 检查容器状态
       if (!this.container) {
-        throw new Error('❌ 容器对象为null或undefined')
+        throw new Error('容器对象为null或undefined')
       }
-      
-      console.log('✅ 容器对象存在:', this.container)
-      console.log('📏 容器类名:', this.container.className)
-      console.log('📐 容器样式:', this.container.style.cssText)
-      console.log('🔗 容器父元素:', this.container.parentElement)
       
       // 安全获取尺寸的函数
       const getSafeDimensions = (element) => {
@@ -92,17 +84,8 @@ export class EmotionUniverse3D {
           const width = element.clientWidth || element.offsetWidth || 0
           const height = element.clientHeight || element.offsetHeight || 0
           
-          console.log(`📊 元素尺寸检测:`, {
-            clientWidth: element.clientWidth,
-            clientHeight: element.clientHeight,
-            offsetWidth: element.offsetWidth,
-            offsetHeight: element.offsetHeight,
-            computed: { width, height }
-          })
-          
           return { width, height }
         } catch (error) {
-          console.error('❌ 获取元素尺寸失败:', error)
           return { width: 0, height: 0 }
         }
       }
@@ -112,12 +95,9 @@ export class EmotionUniverse3D {
       
       // 如果容器尺寸为0，尝试多种方法获取正确尺寸
       if (width === 0 || height === 0) {
-        console.warn('⚠️ 容器尺寸为0，开始修复...')
-        
         // 方法1: 强制设置样式
         try {
           this.container.style.cssText += 'display: block !important; width: 100% !important; height: 500px !important;'
-          console.log('🔧 强制设置容器样式')
           
           // 等待重新计算
           await new Promise(resolve => {
@@ -131,12 +111,11 @@ export class EmotionUniverse3D {
           height = newDims.height
           
         } catch (error) {
-          console.error('❌ 强制设置样式失败:', error)
+          // 忽略错误
         }
         
         // 方法2: 使用父元素尺寸
         if ((width === 0 || height === 0) && this.container.parentElement) {
-          console.log('🔄 尝试使用父元素尺寸...')
           const parentDims = getSafeDimensions(this.container.parentElement)
           
           if (parentDims.width > 0) width = parentDims.width
@@ -145,17 +124,14 @@ export class EmotionUniverse3D {
         
         // 方法3: 使用默认尺寸
         if (width === 0 || height === 0) {
-          console.warn('🔧 使用默认尺寸')
           width = width || 800
           height = height || 600
         }
       }
       
-      console.log('🌌 最终确定尺寸:', width, 'x', height)
-      
       // 验证尺寸有效性
       if (width <= 0 || height <= 0) {
-        throw new Error(`❌ 无效的渲染尺寸: ${width}x${height}`)
+        throw new Error(`无效的渲染尺寸: ${width}x${height}`)
       }
       
       // 设置渲染器
@@ -184,17 +160,6 @@ export class EmotionUniverse3D {
       
       this.container.appendChild(canvas)
       
-      console.log('✅ Canvas已添加到容器:', {
-        canvas: canvas,
-        container: this.container,
-        canvasSize: { width: canvas.width, height: canvas.height },
-        canvasStyle: canvas.style.cssText,
-        containerSize: {
-          width: this.container.clientWidth,
-          height: this.container.clientHeight
-        }
-      })
-      
       // 强制重绘
       this.container.style.transform = 'translateZ(0)'
     
@@ -218,12 +183,10 @@ export class EmotionUniverse3D {
     
     // 添加控制器事件监听
     this.controls.addEventListener('start', () => {
-      console.log('🎮 开始拖拽')
       this.renderer.domElement.style.cursor = 'grabbing'
     })
     
     this.controls.addEventListener('end', () => {
-      console.log('🎮 结束拖拽')
       this.renderer.domElement.style.cursor = 'grab'
     })
     
@@ -234,13 +197,6 @@ export class EmotionUniverse3D {
       }
     })
     
-    console.log('🎮 3D轨道控制器已初始化', {
-      enableRotate: this.controls.enableRotate,
-      enableZoom: this.controls.enableZoom,
-      enablePan: this.controls.enablePan,
-      minDistance: this.controls.minDistance,
-      maxDistance: this.controls.maxDistance
-    })
     
     // 增强光照系统以突出3D立体效果
     
@@ -291,27 +247,11 @@ export class EmotionUniverse3D {
     this.animate()
     
     this.isInitialized = true
-    console.log('🌌 3D情绪宇宙初始化完成')
     
     // 立即进行一次渲染确保可见
     this.renderer.render(this.scene, this.camera)
-    
-    // 验证Canvas是否正确显示
-    setTimeout(() => {
-      const canvas = this.renderer.domElement
-      console.log('🔍 Canvas最终状态检查:', {
-        attached: document.body.contains(canvas),
-        visible: canvas.style.display !== 'none',
-        size: { width: canvas.clientWidth, height: canvas.clientHeight },
-        parent: canvas.parentElement,
-        computedStyle: window.getComputedStyle(canvas)
-      })
-    }, 100)
       
-      // 创建测试用的多个情绪星球
-      console.log('✅ 3D引擎就绪，创建测试情绪星球...')
-      
-      // 根据界面显示的情绪数据创建星球
+      // 创建默认情绪星球
       const testEmotionData = {
         兴奋: 0.62,    // 62%
         中性: 0.55,    // 55% 
@@ -320,21 +260,13 @@ export class EmotionUniverse3D {
         惊讶: 0.73     // 73%
       }
       
-      console.log('📊 测试情绪数据:', testEmotionData)
-      
       // 使用updateEmotionData方法创建所有星球
       this.updateEmotionData(testEmotionData)
       
-      console.log('🌟 多个情绪星球已创建')
-      console.log('🔍 场景中的对象数量:', this.scene.children.length)
-      console.log('🔍 当前星球列表:', Object.keys(this.emotionPlanets))
-      
       // 强制立即渲染一次
       this.renderer.render(this.scene, this.camera)
-      console.log('🎬 强制渲染完成')
       
     } catch (error) {
-      console.error('❌ 3D情绪宇宙初始化失败:', error)
       this.showFallbackMessage(error.message)
     }
   }
@@ -446,12 +378,6 @@ export class EmotionUniverse3D {
       side: THREE.BackSide
     })
     
-    console.log(`🎨 星球材质参数: ${emotionType}`, {
-      radius,
-      color: effectiveColor.toString(16),
-      segments: '64x64 (高质量球体)',
-      material: 'MeshLambertMaterial (3D立体效果)'
-    })
     
     // 创建主星球
     const planet = new THREE.Mesh(geometry, material)
@@ -495,7 +421,6 @@ export class EmotionUniverse3D {
     
     planet.position.set(x, y, z)
     
-    console.log(`🌍 星球位置: ${emotionType} at (${planet.position.x.toFixed(2)}, ${planet.position.y.toFixed(2)}, ${planet.position.z.toFixed(2)}), 距离: ${distance.toFixed(2)}`)
     
     // 添加轨道路径
     this.createOrbitPath(planet, distance)
@@ -503,7 +428,6 @@ export class EmotionUniverse3D {
     this.scene.add(planet)
     this.emotionPlanets[emotionType] = planet
     
-    console.log(`🪐 创建情绪星球: ${emotionType}, 强度: ${intensity}`)
     return planet
   }
   
@@ -587,7 +511,6 @@ export class EmotionUniverse3D {
     material.normalMap = normalTexture
     material.normalScale = new THREE.Vector2(0.3, 0.3)
     
-    console.log('🎨 添加了表面细节纹理')
   }
 
   createOrbitPath(planet, distance) {
@@ -625,20 +548,11 @@ export class EmotionUniverse3D {
     // 更新用户数据
     planet.userData.intensity = intensity
     
-    console.log(`🔄 更新情绪星球: ${emotionType}, 强度: ${intensity}`)
   }
   
   updateEmotionData(emotionData) {
     if (!emotionData || typeof emotionData !== 'object') return
     
-    console.log('📊 更新情绪数据:', emotionData)
-    console.log('📊 数据类型检查:', Object.entries(emotionData).map(([emotion, intensity]) => ({
-      emotion,
-      intensity,
-      type: typeof intensity,
-      isNumber: typeof intensity === 'number',
-      isPositive: intensity > 0
-    })))
     
     // 更新或创建情绪星球 - 降低最小阈值
     Object.entries(emotionData).forEach(([emotion, intensity]) => {
@@ -653,11 +567,9 @@ export class EmotionUniverse3D {
         } else {
           // 确保颜色存在 - 先尝试原始名称，再尝试英文映射
           const color = this.emotionColors[emotion] || this.emotionColors[englishEmotion] || 0xC0C0C0
-          console.log(`🌟 创建新星球: ${emotion} (${englishEmotion}), 强度: ${intensity}, 颜色: ${color.toString(16)}`)
           this.createEmotionPlanet(planetKey, intensity, color)
         }
       } else if (typeof intensity === 'number') {
-        console.log(`⚠️ 强度过低，跳过创建: ${emotion} = ${intensity}`)
       }
     })
     
@@ -668,13 +580,6 @@ export class EmotionUniverse3D {
       }
     })
     
-    console.log('✅ 当前活跃星球:', Object.keys(this.emotionPlanets))
-    console.log('✅ 活跃星球详情:', Object.keys(this.emotionPlanets).map(emotion => ({
-      emotion,
-      intensity: emotionData[emotion],
-      planet: this.emotionPlanets[emotion],
-      position: this.emotionPlanets[emotion] ? this.emotionPlanets[emotion].position : null
-    })))
     
     // 调试场景信息
     this.debugScene()
@@ -705,7 +610,6 @@ export class EmotionUniverse3D {
     })
     
     delete this.emotionPlanets[emotionType]
-    console.log(`🗑️ 移除情绪星球: ${emotionType}`)
   }
   
   addEventListeners() {
@@ -739,7 +643,6 @@ export class EmotionUniverse3D {
       const isClick = dragDuration < 200 && !this.isDragging // 200ms内且没有拖拽
       
       if (isClick) {
-        console.log('🖱️ 检测到点击事件')
         this.onPlanetClick(event)
       }
       
@@ -772,11 +675,6 @@ export class EmotionUniverse3D {
       })
     }
     
-    console.log('🎮 事件监听器已设置', {
-      canvas: canvas,
-      pointerEvents: canvas.style.pointerEvents,
-      cursor: canvas.style.cursor
-    })
   }
   
   onMouseMove(event) {
@@ -863,17 +761,9 @@ export class EmotionUniverse3D {
         targetPlanet = targetPlanet.parent
       }
       
-      // 调试信息
-      console.log('🎯 点击的对象信息:', {
-        clickedObject: intersects[0].object,
-        userData: intersects[0].object.userData,
-        targetPlanet: targetPlanet,
-        planetUserData: targetPlanet.userData
-      })
       
       // 验证是否是有效的星球
       if (!targetPlanet.userData.emotionType) {
-        console.warn('⚠️ 点击的不是有效星球，忽略点击')
         return
       }
       
@@ -1031,7 +921,6 @@ export class EmotionUniverse3D {
   toggleAutoRotate() {
     if (this.controls) {
       this.controls.autoRotate = !this.controls.autoRotate
-      console.log('🔄 自动旋转:', this.controls.autoRotate ? '开启' : '关闭')
       return this.controls.autoRotate
     }
     return false
@@ -1041,35 +930,9 @@ export class EmotionUniverse3D {
   resetCamera() {
     if (this.controls) {
       this.controls.reset()
-      console.log('📷 相机位置已重置')
     }
   }
   
-  // 测试交互功能
-  testInteraction() {
-    console.log('🧪 测试3D交互功能:')
-    console.log('- 轨道控制器:', this.controls ? '✅' : '❌')
-    console.log('- 可旋转:', this.controls?.enableRotate ? '✅' : '❌')
-    console.log('- 可缩放:', this.controls?.enableZoom ? '✅' : '❌')
-    console.log('- 可平移:', this.controls?.enablePan ? '✅' : '❌')
-    console.log('- Canvas事件:', this.renderer.domElement.style.pointerEvents)
-    console.log('- 星球数量:', Object.keys(this.emotionPlanets).length)
-    console.log('- 点击回调:', typeof this.onPlanetSelected)
-    
-    // 模拟点击测试
-    if (Object.keys(this.emotionPlanets).length > 0) {
-      const firstPlanet = Object.values(this.emotionPlanets)[0]
-      console.log('🎯 模拟点击第一个星球:', firstPlanet.userData.emotionType)
-      
-      if (this.onPlanetSelected) {
-        this.onPlanetSelected({
-          emotion: firstPlanet.userData.emotionType,
-          intensity: firstPlanet.userData.intensity,
-          planet: firstPlanet
-        })
-      }
-    }
-  }
   
   // 清理资源
   dispose() {
@@ -1120,22 +983,10 @@ export class EmotionUniverse3D {
     window.removeEventListener('resize', this.onWindowResize)
     
     this.isInitialized = false
-    console.log('🧹 3D情绪宇宙已清理')
   }
   
   debugScene() {
-    console.log('🔍 场景调试信息:')
-    console.log('- 场景子对象数量:', this.scene.children.length)
-    console.log('- 场景子对象类型:', this.scene.children.map(child => ({
-      type: child.type,
-      name: child.name || 'unnamed',
-      position: child.position,
-      visible: child.visible,
-      userData: child.userData
-    })))
-    console.log('- 相机位置:', this.camera.position)
-    console.log('- 相机朝向:', this.camera.getWorldDirection(new THREE.Vector3()))
-    console.log('- 星球对象:', Object.keys(this.emotionPlanets))
+    // 场景调试信息已移除
   }
 
   // 显示错误信息的后备方案

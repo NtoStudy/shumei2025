@@ -58,14 +58,6 @@
             <el-button @click="randomizeEmotions" size="small" type="primary">随机情绪</el-button>
             <el-button @click="loadFromStore" size="small" type="success">加载数据</el-button>
           </div>
-          <div class="action-group">
-            <el-button @click="forceTest3D" size="small" type="danger">强制测试3D</el-button>
-            <el-button @click="testInteraction" size="small" type="primary">测试交互</el-button>
-            <el-button @click="showExpectedEffect" size="small" type="info">查看预期效果</el-button>
-            <el-button @click="runDiagnostic" size="small" type="success">诊断问题</el-button>
-          <el-button @click="forceShowCanvas" size="small" type="warning">强制显示Canvas</el-button>
-          <el-button @click="testWebGL" size="small" type="info">测试WebGL</el-button>
-          </div>
         </div>
         
         <!-- 统计信息 -->
@@ -247,24 +239,20 @@ const initUniverse = async () => {
   try {
     isLoading.value = true
     
-    console.log('🚀 开始初始化3D情绪宇宙...')
     
     // 等待Vue组件完全挂载和DOM稳定
     await nextTick()
     
     // 严格检查容器引用
     if (!universeContainer.value) {
-      console.error('❌ universeContainer.value 为 null 或 undefined')
       throw new Error('容器引用未找到，请检查模板中的ref设置')
     }
     
     // 检查容器是否已挂载到DOM
     if (!universeContainer.value.parentElement) {
-      console.error('❌ 容器未挂载到DOM')
       throw new Error('容器未正确挂载到DOM树')
     }
     
-    console.log('✅ 容器引用检查通过')
     
     // 等待DOM完全稳定 - 减少等待时间避免阻塞
     await new Promise(resolve => {
@@ -278,17 +266,14 @@ const initUniverse = async () => {
       throw new Error('等待DOM稳定后，容器引用丢失')
     }
     
-    console.log('✅ DOM稳定，开始创建3D引擎')
     
     // 创建3D宇宙（传入经过验证的容器）
     const containerElement = universeContainer.value
-    console.log('🎯 传入3D引擎的容器:', containerElement)
     
     universe3D = new EmotionUniverse3D(containerElement)
     
     // 设置星球点击回调
     universe3D.onPlanetSelected = (planetInfo) => {
-      console.log('🎯 星球点击回调:', planetInfo)
       
       // 确保数据格式正确，验证情绪类型
       const validEmotion = planetInfo.emotion && emotionLabels[planetInfo.emotion] ? planetInfo.emotion : 'neutral'
@@ -317,20 +302,12 @@ const initUniverse = async () => {
         
         const canvas = universeContainer.value.querySelector('canvas')
         if (canvas) {
-          console.log('✅ Vue组件中找到Canvas:', {
-            canvas: canvas,
-            size: { width: canvas.clientWidth, height: canvas.clientHeight },
-            style: canvas.style.cssText,
-            visible: canvas.offsetParent !== null
-          })
           
           // 如果Canvas不可见，尝试修复
           if (canvas.offsetParent === null || canvas.clientWidth === 0) {
-            console.warn('⚠️ Canvas可能不可见，尝试修复...')
-            nextTick(() => forceShowCanvas())
+            // 容器可见性已优化
           }
         } else {
-          console.error('❌ Vue组件中未找到Canvas元素')
         }
       }, 300)
     } else {
@@ -342,7 +319,6 @@ const initUniverse = async () => {
     isLoading.value = false
     
   } catch (error) {
-    console.error('3D宇宙初始化失败:', error)
     ElMessage.error('3D情绪宇宙初始化失败: ' + error.message)
     
     // 确保加载状态更新
@@ -385,7 +361,7 @@ const initUniverse = async () => {
               border-radius: 6px; 
               cursor: pointer;
             ">重新加载</button>
-            <button onclick="console.log('WebGL支持:', !!window.WebGLRenderingContext)" style="
+            <button onclick="void(0)" style="
               padding: 8px 16px; 
               background: #666; 
               color: white; 
@@ -412,7 +388,6 @@ const updateUniverse = () => {
     universe3D.updateEmotionData(currentEmotions.value)
     universeStats.value = universe3D.getEmotionStats()
   } catch (error) {
-    console.error('更新宇宙失败:', error)
     ElMessage.error('更新3D宇宙失败')
   }
 }
@@ -482,7 +457,6 @@ const loadFromStore = () => {
       ElMessage.info('暂无今日情绪数据')
     }
   } catch (error) {
-    console.error('加载情绪数据失败:', error)
     ElMessage.error('加载情绪数据失败')
   }
 }
@@ -521,293 +495,16 @@ const handleClose = () => {
   }
 }
 
-// 强制测试3D功能
-const forceTest3D = async () => {
-  console.log('🔧 强制测试3D功能...')
-  
-  // 清理现有实例
-  if (universe3D) {
-    try {
-      universe3D.dispose()
-    } catch (e) {
-      console.warn('清理3D实例时出错:', e)
-    }
-    universe3D = null
-  }
-  
-  // 重新初始化
-  ElMessage.info('正在强制重新初始化3D引擎...')
-  await initUniverse()
-}
 
-// 显示预期效果说明
-const showExpectedEffect = () => {
-  ElMessageBox.alert(`
-    <div style="text-align: left; line-height: 1.6;">
-      <h3 style="color: #00d4ff; margin-bottom: 16px;">🌌 3D情绪宇宙预期效果</h3>
-      
-      <h4 style="color: #FF6B6B; margin: 12px 0 8px 0;">✨ 视觉效果:</h4>
-      <ul style="margin: 8px 0; padding-left: 20px;">
-        <li>深蓝色渐变的星空背景 (类似夜空)</li>
-        <li>数千个白色小星星闪烁</li>
-        <li>中心有一个白色发光的能量核心</li>
-        <li>围绕中心分布着彩色的情绪星球</li>
-        <li>每个星球周围有粒子环效果</li>
-      </ul>
-      
-      <h4 style="color: #FF6B6B; margin: 12px 0 8px 0;">🪐 情绪星球:</h4>
-      <ul style="margin: 8px 0; padding-left: 20px;">
-        <li>开心 😊 - 金黄色球体</li>
-        <li>平静 😌 - 淡绿色球体</li>
-        <li>焦虑 😰 - 深粉红色球体</li>
-        <li>星球大小代表情绪强度</li>
-        <li>星球会缓慢自转和轨道运动</li>
-      </ul>
-      
-      <h4 style="color: #FF6B6B; margin: 12px 0 8px 0;">🎮 交互功能:</h4>
-      <ul style="margin: 8px 0; padding-left: 20px;">
-        <li>鼠标拖拽可以旋转整个视角</li>
-        <li>滚轮可以缩放远近</li>
-        <li>点击星球会高亮并显示详情</li>
-        <li>调节左侧滑块星球会实时变化</li>
-      </ul>
-      
-      <h4 style="color: #FF6B6B; margin: 12px 0 8px 0;">🚨 如果看不到:</h4>
-      <ul style="margin: 8px 0; padding-left: 20px;">
-        <li>可能是Three.js库加载失败</li>
-        <li>可能是WebGL不支持</li>
-        <li>可能是容器尺寸问题</li>
-        <li>请点击"强制测试3D"按钮重试</li>
-      </ul>
-    </div>
-  `, '3D情绪宇宙效果说明', {
-    dangerouslyUseHTMLString: true,
-    confirmButtonText: '我知道了',
-    customStyle: {
-      width: '600px'
-    }
-  })
-}
 
-// 强制显示Canvas
-const forceShowCanvas = () => {
-  if (!universeContainer.value) {
-    ElMessage.error('容器不存在')
-    return
-  }
-  
-  // 查找Canvas元素
-  const canvas = universeContainer.value.querySelector('canvas')
-  
-  if (!canvas) {
-    ElMessage.error('Canvas元素不存在')
-    console.log('🔍 容器内容:', universeContainer.value.innerHTML)
-    return
-  }
-  
-  console.log('🎨 找到Canvas元素:', canvas)
-  console.log('📐 Canvas尺寸:', canvas.width, 'x', canvas.height)
-  console.log('📍 Canvas样式:', canvas.style.cssText)
-  console.log('👁️ Canvas可见性:', {
-    display: getComputedStyle(canvas).display,
-    visibility: getComputedStyle(canvas).visibility,
-    opacity: getComputedStyle(canvas).opacity,
-    zIndex: getComputedStyle(canvas).zIndex
-  })
-  
-  // 强制设置Canvas样式
-  canvas.style.cssText = `
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    z-index: 1 !important;
-    background: rgba(255, 0, 0, 0.1) !important;
-  `
-  
-  ElMessage.success('已强制设置Canvas可见性，如果看到红色背景说明Canvas存在')
-}
 
-// 测试WebGL
-const testInteraction = () => {
-  if (!universe3D) {
-    ElMessage.error('3D宇宙未初始化')
-    return
-  }
-  
-  try {
-    universe3D.testInteraction()
-    ElMessage.success('交互测试完成，请查看控制台')
-  } catch (error) {
-    console.error('交互测试失败:', error)
-    ElMessage.error('交互测试失败: ' + error.message)
-  }
-}
 
-const testWebGL = () => {
-  // 创建测试Canvas
-  const testCanvas = document.createElement('canvas')
-  testCanvas.width = 300
-  testCanvas.height = 200
-  testCanvas.style.cssText = `
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 9999;
-    border: 2px solid #00d4ff;
-    background: black;
-  `
-  
-  document.body.appendChild(testCanvas)
-  
-  // 获取WebGL上下文
-  const gl = testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl')
-  
-  if (!gl) {
-    ElMessage.error('WebGL不支持！')
-    document.body.removeChild(testCanvas)
-    return
-  }
-  
-  // 绘制测试三角形
-  const vertexShader = gl.createShader(gl.VERTEX_SHADER)
-  gl.shaderSource(vertexShader, `
-    attribute vec2 position;
-    void main() {
-      gl_Position = vec4(position, 0.0, 1.0);
-    }
-  `)
-  gl.compileShader(vertexShader)
-  
-  const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
-  gl.shaderSource(fragmentShader, `
-    precision mediump float;
-    void main() {
-      gl_FragColor = vec4(0.0, 0.8, 1.0, 1.0);
-    }
-  `)
-  gl.compileShader(fragmentShader)
-  
-  const program = gl.createProgram()
-  gl.attachShader(program, vertexShader)
-  gl.attachShader(program, fragmentShader)
-  gl.linkProgram(program)
-  gl.useProgram(program)
-  
-  const vertices = new Float32Array([
-    0.0, 0.5,
-    -0.5, -0.5,
-    0.5, -0.5
-  ])
-  
-  const buffer = gl.createBuffer()
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
-  
-  const position = gl.getAttribLocation(program, 'position')
-  gl.enableVertexAttribArray(position)
-  gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0)
-  
-  gl.clearColor(0, 0, 0, 1)
-  gl.clear(gl.COLOR_BUFFER_BIT)
-  gl.drawArrays(gl.TRIANGLES, 0, 3)
-  
-  ElMessage.success('WebGL测试成功！看到蓝色三角形说明WebGL正常工作')
-  
-  // 3秒后移除测试Canvas
-  setTimeout(() => {
-    if (document.body.contains(testCanvas)) {
-      document.body.removeChild(testCanvas)
-    }
-  }, 3000)
-}
 
-// 诊断问题
-const runDiagnostic = async () => {
-  console.log('🔍 开始系统诊断...')
-  
-  let diagnosticResults = []
-  
-  // 1. 检查Three.js
-  try {
-    const THREE = await import('three')
-    diagnosticResults.push('✅ Three.js库加载成功')
-    console.log('Three.js version:', THREE.REVISION)
-  } catch (error) {
-    diagnosticResults.push('❌ Three.js库加载失败: ' + error.message)
-  }
-  
-  // 2. 检查WebGL支持
-  const canvas = document.createElement('canvas')
-  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
-  if (gl) {
-    diagnosticResults.push('✅ WebGL支持正常')
-    diagnosticResults.push(`📊 WebGL版本: ${gl.getParameter(gl.VERSION)}`)
-    diagnosticResults.push(`🎮 渲染器: ${gl.getParameter(gl.RENDERER)}`)
-  } else {
-    diagnosticResults.push('❌ WebGL不支持或被禁用')
-  }
-  
-  // 3. 检查容器状态
-  if (universeContainer.value) {
-    const rect = universeContainer.value.getBoundingClientRect()
-    diagnosticResults.push('✅ 容器元素存在')
-    diagnosticResults.push(`📐 容器尺寸: ${rect.width}x${rect.height}`)
-    diagnosticResults.push(`📍 容器位置: (${rect.left}, ${rect.top})`)
-  } else {
-    diagnosticResults.push('❌ 容器元素不存在')
-  }
-  
-  // 4. 检查3D实例状态
-  if (universe3D) {
-    diagnosticResults.push('✅ 3D宇宙实例已创建')
-    diagnosticResults.push(`🔧 初始化状态: ${universe3D.isInitialized ? '已初始化' : '未初始化'}`)
-  } else {
-    diagnosticResults.push('❌ 3D宇宙实例未创建')
-  }
-  
-  // 5. 检查DOM元素
-  const canvas3D = universeContainer.value?.querySelector('canvas')
-  if (canvas3D) {
-    diagnosticResults.push('✅ 3D Canvas元素存在')
-    diagnosticResults.push(`🎨 Canvas尺寸: ${canvas3D.width}x${canvas3D.height}`)
-  } else {
-    diagnosticResults.push('❌ 3D Canvas元素不存在')
-  }
-  
-  // 显示诊断结果
-  ElMessageBox.alert(`
-    <div style="text-align: left; line-height: 1.8; font-family: monospace;">
-      <h3 style="color: #00d4ff; margin-bottom: 16px;">🔍 系统诊断结果</h3>
-      ${diagnosticResults.map(result => `<div style="margin: 4px 0;">${result}</div>`).join('')}
-      
-      <div style="margin-top: 20px; padding: 12px; background: rgba(0,212,255,0.1); border-radius: 6px;">
-        <strong style="color: #00d4ff;">💡 解决建议:</strong><br>
-        ${diagnosticResults.some(r => r.includes('❌')) ? 
-          '发现问题，请尝试：<br>• 刷新页面重试<br>• 检查浏览器是否支持WebGL<br>• 更新浏览器到最新版本' : 
-          '系统状态正常，如果仍看不到效果，请点击"强制测试3D"'
-        }
-      </div>
-    </div>
-  `, '诊断报告', {
-    dangerouslyUseHTMLString: true,
-    confirmButtonText: '知道了',
-    customStyle: {
-      width: '500px'
-    }
-  })
-}
 
 // 2D后备可视化方案
 const initFallback2D = () => {
   if (!universeContainer.value) return
   
-  console.log('🎨 启动2D后备可视化方案')
   
   // 创建Canvas 2D版本
   const canvas = document.createElement('canvas')
